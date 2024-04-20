@@ -1,3 +1,4 @@
+const UserDto = require("../dtos/user-dto");
 const userService = require("../service/user-service");
 
 class UserContoller {
@@ -117,7 +118,8 @@ class UserContoller {
 
   async getUser(req, res, next) {
     try {
-      return res.json(req.user);
+      const user = new UserDto(req.user);
+      return res.json({...user});
     } catch (err) {
       next(err);
     }
