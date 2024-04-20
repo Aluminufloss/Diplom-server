@@ -88,17 +88,17 @@ class UserService {
 
   async refresh(refreshToken) {
     if (!refreshToken) {
-      throw ApiError.UnauthorizedError("You don't have refresh token");
+      throw ApiError.UnauthorizedError("У вас нету refresh токена");
     }
 
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDB = await tokenService.findToken(refreshToken);
     if (!userData) {
-      throw ApiError.UnauthorizedError("Token didn't validate correctly");
+      throw ApiError.UnauthorizedError("Токен не был валидирован корректно");
     }
 
     if (!tokenFromDB) {
-      throw ApiError.UnauthorizedError("Token doesn't exist in database");
+      throw ApiError.UnauthorizedError("Токен не существует в базе данных");
     }
 
     const user = await UserModel.findById(userData.id);
@@ -142,14 +142,14 @@ class UserService {
     const userData = tokenService.validateRefreshToken(refreshToken);
     const tokenFromDB = await tokenService.findToken(refreshToken);
     if (!userData) {
-      throw ApiError.UnauthorizedError("Token didn't validate correctly");
+      throw ApiError.UnauthorizedError("Токен не был валидирован корретно");
     }
 
     if (!tokenFromDB) {
-      throw ApiError.UnauthorizedError("Token doesn't exist in database");
+      throw ApiError.UnauthorizedError("Токен не существует в базе данных");
     }
 
-    const user = await UserModel.findById(userData.id);
+const user = await UserModel.findById(userData.id);
     const userDto = new UserDto(user);
 
     return { user: userDto };
