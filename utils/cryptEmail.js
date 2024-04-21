@@ -30,7 +30,6 @@ function encryptAndFormatAsUuid(email) {
 }
 
 function decryptFormattedUuid(encryptedUuid) {
-  console.log("encrypted", encryptedUuid);
   const encryptedWithIv = encryptedUuid.replace(/-/g, "");
   const encrypted = encryptedWithIv.substr(0, encryptedWithIv.length - 32);
   const ivHex = encryptedWithIv.substr(encryptedWithIv.length - 32, 32);

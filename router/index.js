@@ -9,6 +9,8 @@ router.post("/login", userController.login);
 router.post("/logout", authMiddleware, userController.logout);
 router.post("/me", authMiddleware, userController.getUser);
 router.post("/refresh", userController.refresh);
+router.post("/sendChangeLink", userController.sendChangePasswordLink);
+router.post("/changePassword", userController.changePassword);
 
 router.get("/activate/:link", userController.activate);
 
