@@ -1,10 +1,10 @@
-const listService = require("../service/list-service");
+const ListService = require("../service/list-service");
 
 class ListController {
   async createGeneralLists(req, res) {
     try {
       const { userId } = req.body;
-      const lists = await listService.createGeneralLists(userId);
+      const lists = await ListService.createGeneralLists(userId);
       return res.json(lists);
     } catch (err) {
       console.log("err", err)
@@ -13,7 +13,7 @@ class ListController {
   async createList(req, res) {
     try {
       const { name, userId } = req.body;
-      const list = await listService.createList(name, userId);
+      const list = await ListService.createList(name, userId);
       return res.json(list);
     } catch (err) {
       console.log("err", err)
@@ -23,7 +23,7 @@ class ListController {
   async deleteList(req, res) {
     try {
       const { listId, userId } = req.body;
-      const list = await listService.deleteList(listId, userId);
+      const list = await ListService.deleteList(listId, userId);
       return res.json(list);
     } catch (err) {
       console.log("err", err)
@@ -33,7 +33,7 @@ class ListController {
   async getList(req, res) {
     try {
       const { listId } = req.body;
-      const list = await listService.getList(listId);
+      const list = await ListService.getList(listId);
       return res.json(list);
     } catch (err) {
       console.log("err", err)
