@@ -1,9 +1,9 @@
-const taskService = require("../service/task-service");
+const TaskService = require("../service/task-service");
 
 class TaskController {
   async createTask(req, res, next) {
     try {
-      const task = await taskService.createTask({
+      const task = await TaskService.createTask({
         title: req.body.title,
         description: req.body.description,
         listId: req.body.listId,
@@ -24,7 +24,7 @@ class TaskController {
   async deleteTask(req, res, next) {
     try {
       const { taskId, userId } = req.body;
-      await taskService.deleteTask(taskId, userId);
+      await TaskService.deleteTask(taskId, userId);
       return res.json("Задача была успешно удалена");
     } catch (err) {
       next(err);
@@ -34,7 +34,7 @@ class TaskController {
   async updateTask(req, res, next) {
     try {
       const { taskId, updatedTaskData } = req.body;
-      const task = await taskService.updateTask(taskId, updatedTaskData);
+      const task = await TaskService.updateTask(taskId, updatedTaskData);
       return res.json(task);
     } catch (err) {
       next(err);
@@ -44,7 +44,7 @@ class TaskController {
   async getTask(req, res, next) {
     try {
       const { taskId } = req.body;
-      const task = await taskService.getTask(taskId);
+      const task = await TaskService.getTask(taskId);
       return res.json(task);
     } catch (err) {
       next(err);
@@ -54,7 +54,7 @@ class TaskController {
   async getTodayTasks(req, res, next) {
     try {
       const { userId } = req.body;
-      const tasks = await taskService.getTodayTasks(userId);
+      const tasks = await TaskService.getTodayTasks(userId);
       return res.json(tasks);
     } catch (err) {
       next(err);
@@ -64,7 +64,7 @@ class TaskController {
   async getPlannedTasks(req, res, next) {
     try {
       const { userId } = req.body;
-      const tasks = await taskService.getPlannedTasks(userId);
+      const tasks = await TaskService.getPlannedTasks(userId);
       return res.json(tasks);
     } catch (err) {
       next(err);
@@ -74,7 +74,7 @@ class TaskController {
   async getAllTasks(req, res, next) {
     try {
       const { userId } = req.body;
-      const tasks = await taskService.getAllTasks(userId);
+      const tasks = await TaskService.getAllTasks(userId);
       return res.json(tasks);
     } catch (err) {
       next(err);
