@@ -7,7 +7,8 @@ const TodayListSchema = new Schema({
 
 const PlannedListSchema = new Schema({
   name: { type: String, default: "Planned" },
-  tasks: [{ type: Schema.Types.ObjectId, ref: "Task", default: []  }]
+  tasks: [{ type: Schema.Types.ObjectId, ref: "Task", default: []  }],
+  minPlannedDate: { type: Date, default: Date.now },
 });
 
 const AllTasksListSchema = new Schema({
