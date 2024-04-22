@@ -4,6 +4,8 @@ const router = new Router();
 const taskController = require("../controller/task-controller");
 const listController = require("../controller/list-controller");
 const userController = require("../controller/user-controller");
+const groupController = require("../controller/group-controller");
+
 const authMiddleware = require("../middleware/auth-middleware");
 
 router.post("/registration", userController.registration);
@@ -27,5 +29,11 @@ router.post("/getToday/task", taskController.getTodayTasks);
 router.post("/getPlanned/task", taskController.getPlannedTasks);
 router.post("/getAll/task", taskController.getAllTasks);
 router.post("/get/task", taskController.getTask);
+
+router.post("/create/group", groupController.createGroup);
+router.post("/delete/group", groupController.deleteGroup);
+router.post("/updateName/group", groupController.updateGroupName);
+router.post("/addList/group", groupController.addListToGroup);
+router.post("/removeList/group", groupController.removeListFromGroup);
 
 module.exports = router;
