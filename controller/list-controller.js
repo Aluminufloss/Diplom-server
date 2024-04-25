@@ -7,7 +7,7 @@ class ListController {
       const lists = await ListService.createGeneralLists(userId);
       return res.json(lists);
     } catch (err) {
-      console.log("err", err)
+      next(err);
     }
   }
   async createList(req, res) {
@@ -16,7 +16,7 @@ class ListController {
       const list = await ListService.createList(name, userId);
       return res.json(list);
     } catch (err) {
-      console.log("err", err)
+      next(err);
     }
   }
 
@@ -26,7 +26,7 @@ class ListController {
       const list = await ListService.deleteList(listId, userId);
       return res.json(list);
     } catch (err) {
-      console.log("err", err)
+      next(err);
     }
   }
 
@@ -36,7 +36,7 @@ class ListController {
       const list = await ListService.getList(listId);
       return res.json(list);
     } catch (err) {
-      console.log("err", err)
+      next(err);
     }
   }
 }
