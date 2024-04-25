@@ -1,4 +1,4 @@
-const GroupModel = require("../models/group-model");
+const GroupModel = require("../models/Group");
 
 const ApiError = require("../exceptions/api-error");
 
