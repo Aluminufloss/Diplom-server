@@ -5,6 +5,7 @@ const taskController = require("../controller/task-controller");
 const listController = require("../controller/list-controller");
 const userController = require("../controller/user-controller");
 const groupController = require("../controller/group-controller");
+const notificationController = require("../controller/notification-controller");
 
 const authMiddleware = require("../middleware/auth-middleware");
 
@@ -35,5 +36,10 @@ router.post("/delete/group", groupController.deleteGroup);
 router.post("/updateName/group", groupController.updateGroupName);
 router.post("/addList/group", groupController.addListToGroup);
 router.post("/removeList/group", groupController.removeListFromGroup);
+
+router.post("/create/notification", notificationController.createNotification);
+router.post("/delete/notification", notificationController.deleteNotification);
+router.post("/get/notification", notificationController.getNotifications);
+router.get("/getAll/notification", notificationController.getAllNotifications);
 
 module.exports = router;
