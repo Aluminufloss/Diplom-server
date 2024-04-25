@@ -2,7 +2,7 @@ const TaskModel = require("../models/Task");
 const ListModel = require("../models/List");
 const GeneralListsModel = require("../models/GeneralLists");
 
-const { checkIsDateToday } = require("../utils/checkIsDateToday");
+const { isDatesEqual, isFirstDateAfterSecond } = require("../utils/datesUtils");
 
 const ApiError = require("../exceptions/api-error");
 
@@ -28,7 +28,7 @@ class TaskService {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
 
-    const isDateToday = checkIsDateToday(plannedDate, new Date());
+    const isDateToday = isDatesEqual(new Date(plannedDate), new Date());
 
     if (isDateToday) {
       listIds.push(todayList._id);
@@ -140,7 +140,7 @@ class TaskService {
       const plannedList = generalLists.plannedList;
       const todayList = generalLists.todayList;
 
-      if (!checkIsDateToday(updatedTaskData.plannedDate, new Date())) {
+      if (!isDatesEqual(new Date(updatedTaskData.plannedDate), new Date())) {
         todayList.tasks = todayList.tasks.filter(
           (id) => id.toString() !== taskId
         );
@@ -182,7 +182,14 @@ class TaskService {
       const tasks = generalLists.todayList.tasks;
 
       if (
-        !checkIsDateToday(generalLists.plannedList.minPlannedDate, new Date())
+        isFirstDateAfterSecond(
+          new Date(generalLists.plannedList.minPlannedDate),
+          new Date()
+        ) ||
+        isDatesEqual(
+          new Date(generalLists.plannedList.minPlannedDate),
+          new Date()
+        )
       ) {
         return await Promise.all(tasks.map((taskId) => this.getTask(taskId)));
       }
@@ -193,7 +200,7 @@ class TaskService {
       for (const taskId of generalLists.plannedList.tasks) {
         const task = await this.getTask(taskId);
 
-        if (checkIsDateToday(task.plannedDate, new Date())) {
+        if (isDatesEqual(new Date(task.plannedDate), new Date())) {
           tasks.push(task);
           tasksToDeleteFromPlanned.push(taskId);
         } else {
