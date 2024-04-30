@@ -7,7 +7,7 @@ class ListController {
       const lists = await ListService.createGeneralLists(userId);
       return res.json(lists);
     } catch (err) {
-      next();
+      next(err);
     }
   }
   async createList(req, res, next) {
@@ -17,7 +17,7 @@ class ListController {
       const list = await ListService.createList(title, id);
       return res.json(list);
     } catch (err) {
-      next();
+      next(err);
     }
   }
 
@@ -28,7 +28,7 @@ class ListController {
       await ListService.deleteList(listId, id);
       return res.json("Список был успешно удалён");
     } catch (err) {
-      next();
+      next(err);
     }
   }
 
@@ -37,46 +37,6 @@ class ListController {
       const { listId } = req.body;
       const list = await ListService.getList(listId);
       return res.json(list);
-    } catch (err) {
-      next();
-    }
-  }
-
-  async getLists(req, res, next) {
-    try {
-      const { id } = req.user;
-      const lists = await ListService.getLists(id);
-      return res.json(lists);
-    } catch (err) {
-      next();
-    }
-  }
-
-  async getListName(req, res, next) {
-    try {
-      const { listId } = req.body;
-      const listName = await ListService.getListName(listId);
-      return res.json(listName);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getAllListsNames(req, res, next) {
-    try {
-      const { listsId } = req.body;
-      const listsNames = await ListService.getAllListsNames(listsId);
-      return res.json(listsNames);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getTasksByListId(req, res, next) {
-    try {
-      const { listId } = req.body;
-      const tasks = await ListService.getTasksByListId(listId);
-      return res.json(tasks);
     } catch (err) {
       next(err);
     }
