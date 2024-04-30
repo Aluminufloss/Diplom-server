@@ -2,27 +2,21 @@ const TaskModel = require("../models/Task");
 const ListModel = require("../models/List");
 const GeneralListsModel = require("../models/GeneralLists");
 
-const filterTodayTasks = require("../utils/filterTodayTasks");
-
-const TaskDto = require("../dtos/task-dto");
-
 const { isDatesEqual, isFirstDateAfterSecond } = require("../utils/datesUtils");
 
 const ApiError = require("../exceptions/api-error");
 
 class TaskService {
-  async createTask(taskData, userId) {
-    const {
-      title,
-      description,
-      listId,
-      priority,
-      plannedDate,
-      repeatDays,
-      category,
-      status,
-    } = taskData;
-
+  async createTask({
+    title,
+    description,
+    listId,
+    userId,
+    priority,
+    plannedDate = new Date(),
+    repeat,
+    category,
+  }) {
     const listIds = !!listId ? [listId] : [];
 
     const generalLists = await GeneralListsModel.findOne({ userId });
@@ -51,9 +45,8 @@ class TaskService {
       userId,
       priority,
       plannedDate,
-      repeatDays,
+      repeat,
       category,
-      status,
     });
 
     if (!task) {
@@ -124,20 +117,20 @@ class TaskService {
     await task.remove();
   }
 
-  async updateTask(taskData, userId) {
-    const task = await TaskModel.findById(taskData.taskId);
+  async updateTask(taskId, updatedTaskData) {
+    const task = await TaskModel.findById(taskId);
 
     if (!task) {
       throw new ApiError.NotFound("Задача не была найдена");
     }
 
-    Object.assign(task, taskData);
+    Object.assign(task, updatedTaskData);
 
     await task.save();
 
-    if (taskData.plannedDate) {
+    if (updatedTaskData.plannedDate) {
       const generalLists = await GeneralListsModel.findOne({
-        userId,
+        userId: task.userId,
       });
 
       if (!generalLists) {
@@ -147,12 +140,12 @@ class TaskService {
       const plannedList = generalLists.plannedList;
       const todayList = generalLists.todayList;
 
-      if (!isDatesEqual(new Date(taskData.plannedDate), new Date())) {
+      if (!isDatesEqual(new Date(updatedTaskData.plannedDate), new Date())) {
         todayList.tasks = todayList.tasks.filter(
-          (id) => id.toString() !== taskData.taskId
+          (id) => id.toString() !== taskId
         );
 
-        plannedList.tasks.push(taskData.taskId);
+        plannedList.tasks.push(taskId);
 
         plannedList.minPlannedDate =
           plannedList.minPlannedDate > task.plannedDate
@@ -160,10 +153,10 @@ class TaskService {
             : plannedList.minPlannedDate;
       } else {
         plannedList.tasks = plannedList.tasks.filter(
-          (id) => id.toString() !== taskData.taskId
+          (id) => id.toString() !== taskId
         );
 
-        todayList.tasks.push(taskData.taskId);
+        todayList.tasks.push(taskId);
       }
 
       await generalLists.save();
@@ -175,7 +168,7 @@ class TaskService {
   async getTask(taskId) {
     const task = await TaskModel.findById(taskId);
     if (!task) {
-      throw ApiError.BadRequest("Задача не была найдена");
+      throw new ApiError.NotFound("Задача не была найдена");
     }
     return task;
   }
@@ -188,26 +181,6 @@ class TaskService {
       }
       const tasks = generalLists.todayList.tasks;
 
-      const todayTasks = await Promise.all(
-        tasks.map((taskId) => this.getTask(taskId))
-      );
-
-      const { filteredTodayTasks, tasksToDeleteFromToday } =
-        filterTodayTasks(todayTasks);
-
-      GeneralListsModel.findOneAndUpdate(
-        { userId },
-        {
-          $pull: {
-            "todayList.tasks": { $in: tasksToDeleteFromToday },
-          },
-          $push: {
-            "plannedList.tasks": { $each: tasksToDeleteFromToday },
-          },
-        },
-        { new: true }
-      );
-
       if (
         isFirstDateAfterSecond(
           new Date(generalLists.plannedList.minPlannedDate),
@@ -218,7 +191,7 @@ class TaskService {
           new Date()
         )
       ) {
-        return filteredTodayTasks.map((task) => new TaskDto(task));
+        return await Promise.all(tasks.map((taskId) => this.getTask(taskId)));
       }
 
       const tasksToDeleteFromPlanned = [];
@@ -228,7 +201,7 @@ class TaskService {
         const task = await this.getTask(taskId);
 
         if (isDatesEqual(new Date(task.plannedDate), new Date())) {
-          filteredTodayTasks.push(task);
+          tasks.push(task);
           tasksToDeleteFromPlanned.push(taskId);
         } else {
           newMinDate =
@@ -236,54 +209,12 @@ class TaskService {
         }
       }
 
-      if (!!newMinDate) {
-        generalLists.plannedList.minPlannedDate = newMinDate;
-      }
+      generalLists.plannedList.minPlannedDate = newMinDate;
 
       if (!tasksToDeleteFromPlanned.length) {
-        return filteredTodayTasks.map((task) => new TaskDto(task));
+        return await Promise.all(tasks.map((taskId) => this.getTask(taskId)));
       }
 
-      GeneralListsModel.findOneAndUpdate(
-        { userId },
-        {
-          $pull: {
-            "plannedList.tasks": { $in: tasksToDeleteFromPlanned },
-          },
-        },
-        { new: true }
-      );
-
-      return filteredTodayTasks.map((task) => new TaskDto(task));
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async getPlannedTasks(userId) {
-    const generalLists = await GeneralListsModel.findOne({ userId });
-
-    if (!generalLists) {
-      throw ApiError.BadRequest("Неккоректный id пользователя");
-    }
-
-    const plannedTasks = generalLists.plannedList.tasks;
-    const todayTasks = generalLists.todayList.tasks;
-
-    const tasksToDeleteFromPlanned = [];
-    const resultTasks = [];
-
-    for (const taskId of plannedTasks) {
-      const task = await this.getTask(taskId);
-      if (isDatesEqual(new Date(task.plannedDate), new Date())) {
-        tasksToDeleteFromPlanned.push(taskId);
-        todayTasks.push(taskId);
-      } else {
-        resultTasks.push(task);
-      }
-    }
-
-    if (tasksToDeleteFromPlanned.length) {
       await GeneralListsModel.findOneAndUpdate(
         { userId },
         {
@@ -294,42 +225,28 @@ class TaskService {
         { new: true }
       );
 
-      await generalLists.save();
+      return await Promise.all(tasks.map((taskId) => this.getTask(taskId)));
+    } catch (err) {
+      console.log("err", err);
     }
+  }
 
-    return resultTasks.map((task) => new TaskDto(task));
+  async getPlannedTasks(userId) {
+    const generalLists = await GeneralListsModel.findOne({ userId });
+    if (!generalLists) {
+      throw ApiError.BadRequest("Неккоректный id пользователя");
+    }
+    const tasks = generalLists.plannedList.tasks;
+    return tasks;
   }
 
   async getAllTasks(userId) {
     const generalLists = await GeneralListsModel.findOne({ userId });
-
     if (!generalLists) {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
-
-    const tasks = [];
-
-    for (const taskId of generalLists.allTasksList.tasks) {
-      const task = await this.getTask(taskId);
-
-      if (
-        isFirstDateAfterSecond(new Date(), task.plannedDate) &&
-        task.status !== "completed"
-      ) {
-        task.status = "expired";
-        task.save();
-      }
-
-      tasks.push(new TaskDto(task));
-    }
-
+    const tasks = generalLists.allTasksList.tasks;
     return tasks;
-  }
-
-  async changeTaskStatus(taskId, status) {
-    const task = await this.getTask(taskId);
-    task.status = status;
-    await task.save();
   }
 }
 
