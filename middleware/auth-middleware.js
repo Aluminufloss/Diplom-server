@@ -20,8 +20,6 @@ module.exports = function (req, res, next) {
       return next(ApiError.UnauthorizedError("Token didn't validate correctly"));
     }
 
-    console.log("user data", userData)
-
     req.user = userData;
     next();
   } catch (err) {
