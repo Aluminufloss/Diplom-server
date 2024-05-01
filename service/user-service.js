@@ -52,9 +52,7 @@ class UserService {
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
-    await listService.createList("Today", userDto.id);
-    await listService.createList("Planned", userDto.id);
-    await listService.createList("Tasks", userDto.id);
+    await listService.createGeneralLists(userDto.id);
 
     return { ...tokens, user: userDto };
   }
