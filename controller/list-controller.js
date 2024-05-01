@@ -1,40 +1,82 @@
 const ListService = require("../service/list-service");
 
 class ListController {
-  async createGeneralLists(req, res) {
+  async createGeneralLists(req, res, next) {
     try {
       const { userId } = req.body;
       const lists = await ListService.createGeneralLists(userId);
       return res.json(lists);
     } catch (err) {
-      next(err);
+      next();
     }
   }
-  async createList(req, res) {
+  async createList(req, res, next) {
     try {
-      const { name, userId } = req.body;
-      const list = await ListService.createList(name, userId);
+      const { title } = req.body;
+      const { id } = req.user;
+      const list = await ListService.createList(title, id);
       return res.json(list);
     } catch (err) {
-      next(err);
+      next();
     }
   }
 
-  async deleteList(req, res) {
+  async deleteList(req, res, next) {
     try {
-      const { listId, userId } = req.body;
-      const list = await ListService.deleteList(listId, userId);
-      return res.json(list);
+      const { id } = req.user;
+      const { listId } = req.body;
+      await ListService.deleteList(listId, id);
+      return res.json("Список был успешно удалён");
     } catch (err) {
-      next(err);
+      next();
     }
   }
 
-  async getList(req, res) {
+  async getList(req, res, next) {
     try {
       const { listId } = req.body;
       const list = await ListService.getList(listId);
       return res.json(list);
+    } catch (err) {
+      next();
+    }
+  }
+
+  async getLists(req, res, next) {
+    try {
+      const { id } = req.user;
+      const lists = await ListService.getLists(id);
+      return res.json(lists);
+    } catch (err) {
+      next();
+    }
+  }
+
+  async getListName(req, res, next) {
+    try {
+      const { listId } = req.body;
+      const listName = await ListService.getListName(listId);
+      return res.json(listName);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getAllListsNames(req, res, next) {
+    try {
+      const { listsId } = req.body;
+      const listsNames = await ListService.getAllListsNames(listsId);
+      return res.json(listsNames);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getTasksByListId(req, res, next) {
+    try {
+      const { listId } = req.body;
+      const tasks = await ListService.getTasksByListId(listId);
+      return res.json(tasks);
     } catch (err) {
       next(err);
     }
