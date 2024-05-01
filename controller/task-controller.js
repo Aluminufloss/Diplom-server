@@ -3,28 +3,19 @@ const TaskService = require("../service/task-service");
 class TaskController {
   async createTask(req, res, next) {
     try {
-      const task = await TaskService.createTask({
-        title: req.body.title,
-        description: req.body.description,
-        listId: req.body.listId,
-        priority: req.body.priority,
-        plannedDate: req.body.plannedDate,
-        repeat: req.body.repeat,
-        category: req.body.category,
-        userId: req.body.userId
-      });
-
+      const { id } = req.user;
+      const task = await TaskService.createTask(req.body.taskData, id);
       return res.json(task);
     } catch (err) {
-      console.log("err", err)
       next(err);
     }
   }
 
   async deleteTask(req, res, next) {
     try {
-      const { taskId, userId } = req.body;
-      await TaskService.deleteTask(taskId, userId);
+      const { id } = req.user;
+      const { taskId } = req.body;
+      await TaskService.deleteTask(taskId, id);
       return res.json("Задача была успешно удалена");
     } catch (err) {
       next(err);
@@ -33,8 +24,9 @@ class TaskController {
 
   async updateTask(req, res, next) {
     try {
-      const { taskId, updatedTaskData } = req.body;
-      const task = await TaskService.updateTask(taskId, updatedTaskData);
+      const { id } = req.user;
+      const { taskData } = req.body;
+      const task = await TaskService.updateTask(taskData, id);
       return res.json(task);
     } catch (err) {
       next(err);
@@ -53,8 +45,8 @@ class TaskController {
 
   async getTodayTasks(req, res, next) {
     try {
-      const { userId } = req.body;
-      const tasks = await TaskService.getTodayTasks(userId);
+      const { id } = req.user;
+      const tasks = await TaskService.getTodayTasks(id);
       return res.json(tasks);
     } catch (err) {
       next(err);
@@ -63,8 +55,8 @@ class TaskController {
 
   async getPlannedTasks(req, res, next) {
     try {
-      const { userId } = req.body;
-      const tasks = await TaskService.getPlannedTasks(userId);
+      const { id } = req.user;
+      const tasks = await TaskService.getPlannedTasks(id);
       return res.json(tasks);
     } catch (err) {
       next(err);
@@ -73,9 +65,19 @@ class TaskController {
 
   async getAllTasks(req, res, next) {
     try {
-      const { userId } = req.body;
-      const tasks = await TaskService.getAllTasks(userId);
+      const { id } = req.user;
+      const tasks = await TaskService.getAllTasks(id);
       return res.json(tasks);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async changeTaskStatus(req, res, next) {
+    try {
+      const { taskId, status } = req.body;
+      await TaskService.changeTaskStatus(taskId, status);
+      return res.json("Статус задачи был успешно изменен");
     } catch (err) {
       next(err);
     }
