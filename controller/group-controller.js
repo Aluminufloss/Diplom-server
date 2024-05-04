@@ -3,8 +3,9 @@ const GroupService = require("../service/group-service");
 class GroupController {
   async createGroup(req, res, next) {
     try {
-      const { name, userId } = req.body;
-      const group = await GroupService.createGroup(name, userId);
+      const { name } = req.body;
+      const { id } = req.user;
+      const group = await GroupService.createGroup(name, id);
       return res.json(group);
     } catch (err) {
       next(err);
@@ -46,6 +47,26 @@ class GroupController {
       const { groupId, listId } = req.body;
       const group = await GroupService.removeListFromGroup(groupId, listId);
       return res.json(group);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getGroupsNames(req, res, next) {
+    try {
+      const { groupIds } = req.body;
+      const groupsNames = await GroupService.getGroupsNames(groupIds);
+      return res.json(groupsNames);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getGroupName(req, res, next) {
+    try {
+      const { groupId } = req.body;
+      const groupName = await GroupService.getGroupName(groupId);
+      return res.json(groupName);
     } catch (err) {
       next(err);
     }
