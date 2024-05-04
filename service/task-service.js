@@ -34,7 +34,7 @@ class TaskService {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
 
-    const isDateToday = isDatesEqual(new Date(plannedDate), new Date());
+    const isDateToday = isDatesEqual(plannedDate, new Date());
 
     if (isDateToday) {
       listIds.push(todayList._id);
@@ -81,7 +81,8 @@ class TaskService {
     }
 
     await generalLists.save();
-    return task;
+
+    return new TaskDto(task);
   }
 
   async deleteTask(taskId, userId) {
@@ -147,7 +148,7 @@ class TaskService {
       const plannedList = generalLists.plannedList;
       const todayList = generalLists.todayList;
 
-      if (!isDatesEqual(new Date(taskData.plannedDate), new Date())) {
+      if (!isDatesEqual(taskData.plannedDate, new Date())) {
         todayList.tasks = todayList.tasks.filter(
           (id) => id.toString() !== taskData.taskId
         );
@@ -169,7 +170,7 @@ class TaskService {
       await generalLists.save();
     }
 
-    return task;
+    return new TaskDto(task);
   }
 
   async getTask(taskId) {
@@ -181,83 +182,79 @@ class TaskService {
   }
 
   async getTodayTasks(userId) {
-    try {
-      const generalLists = await GeneralListsModel.findOne({ userId });
-      if (!generalLists) {
-        throw ApiError.BadRequest("Неккоректный id пользователя");
-      }
-      const tasks = generalLists.todayList.tasks;
-
-      const todayTasks = await Promise.all(
-        tasks.map((taskId) => this.getTask(taskId))
-      );
-
-      const { filteredTodayTasks, tasksToDeleteFromToday } =
-        filterTodayTasks(todayTasks);
-
-      GeneralListsModel.findOneAndUpdate(
-        { userId },
-        {
-          $pull: {
-            "todayList.tasks": { $in: tasksToDeleteFromToday },
-          },
-          $push: {
-            "plannedList.tasks": { $each: tasksToDeleteFromToday },
-          },
-        },
-        { new: true }
-      );
-
-      if (
-        isFirstDateAfterSecond(
-          new Date(generalLists.plannedList.minPlannedDate),
-          new Date()
-        ) ||
-        isDatesEqual(
-          new Date(generalLists.plannedList.minPlannedDate),
-          new Date()
-        )
-      ) {
-        return filteredTodayTasks.map((task) => new TaskDto(task));
-      }
-
-      const tasksToDeleteFromPlanned = [];
-      let newMinDate = null;
-
-      for (const taskId of generalLists.plannedList.tasks) {
-        const task = await this.getTask(taskId);
-
-        if (isDatesEqual(new Date(task.plannedDate), new Date())) {
-          filteredTodayTasks.push(task);
-          tasksToDeleteFromPlanned.push(taskId);
-        } else {
-          newMinDate =
-            newMinDate > task.plannedDate ? task.plannedDate : newMinDate;
-        }
-      }
-
-      if (!!newMinDate) {
-        generalLists.plannedList.minPlannedDate = newMinDate;
-      }
-
-      if (!tasksToDeleteFromPlanned.length) {
-        return filteredTodayTasks.map((task) => new TaskDto(task));
-      }
-
-      GeneralListsModel.findOneAndUpdate(
-        { userId },
-        {
-          $pull: {
-            "plannedList.tasks": { $in: tasksToDeleteFromPlanned },
-          },
-        },
-        { new: true }
-      );
-
-      return filteredTodayTasks.map((task) => new TaskDto(task));
-    } catch (err) {
-      console.log(err);
+    const generalLists = await GeneralListsModel.findOne({ userId });
+    if (!generalLists) {
+      throw ApiError.BadRequest("Неккоректный id пользователя");
     }
+    const tasks = generalLists.todayList.tasks;
+
+    const todayTasks = await Promise.all(
+      tasks.map((taskId) => this.getTask(taskId))
+    );
+
+    const { filteredTodayTasks, tasksToDeleteFromToday } =
+      filterTodayTasks(todayTasks);
+
+    GeneralListsModel.findOneAndUpdate(
+      { userId },
+      {
+        $pull: {
+          "todayList.tasks": { $in: tasksToDeleteFromToday },
+        },
+        $push: {
+          "plannedList.tasks": { $each: tasksToDeleteFromToday },
+        },
+      },
+      { new: true }
+    );
+
+    if (
+      isFirstDateAfterSecond(
+        new Date(generalLists.plannedList.minPlannedDate),
+        new Date()
+      ) ||
+      isDatesEqual(
+        new Date(generalLists.plannedList.minPlannedDate),
+        new Date()
+      )
+    ) {
+      return filteredTodayTasks.map((task) => new TaskDto(task));
+    }
+
+    const tasksToDeleteFromPlanned = [];
+    let newMinDate = null;
+
+    for (const taskId of generalLists.plannedList.tasks) {
+      const task = await this.getTask(taskId);
+
+      if (isDatesEqual(task.plannedDate, new Date())) {
+        filteredTodayTasks.push(task);
+        tasksToDeleteFromPlanned.push(taskId);
+      } else {
+        newMinDate =
+          newMinDate > task.plannedDate ? task.plannedDate : newMinDate;
+      }
+    }
+
+    if (!!newMinDate) {
+      generalLists.plannedList.minPlannedDate = newMinDate;
+    }
+
+    if (!tasksToDeleteFromPlanned.length) {
+      return filteredTodayTasks.map((task) => new TaskDto(task));
+    }
+
+    GeneralListsModel.findOneAndUpdate(
+      { userId },
+      {
+        $pull: {
+          "plannedList.tasks": { $in: tasksToDeleteFromPlanned },
+        },
+      },
+      { new: true }
+    );
+
+    return filteredTodayTasks.map((task) => new TaskDto(task));
   }
 
   async getPlannedTasks(userId) {
