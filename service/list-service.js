@@ -17,8 +17,14 @@ class ListService {
       );
     }
 
-    const list = await ListModel.create({ name, userId });
-    return new ListDto(list);
+    const list = await ListModel.findOne({ name, userId });
+
+    if (list) {
+      throw ApiError.BadRequest("Список с таким названием уже существует");
+    }
+
+    const newList = await ListModel.create({ name, userId });
+    return new ListDto(newList);
   }
 
   async createGeneralLists(userId) {
