@@ -25,7 +25,8 @@ router.post("/get/list", listController.getList);
 router.post("/get/lists", authMiddleware, listController.getLists);
 router.post("/get/listName", listController.getListName);
 router.post("/getAll/listsName", listController.getAllListsNames);
-router.post("/getTasksByListId/list", authMiddleware, listController.getTasksByListId);
+router.post("/getTasksByListId/list", authMiddleware, listController.getTasksByListId
+);
 
 router.post("/create/task", authMiddleware, taskController.createTask);
 router.post("/delete/task", authMiddleware, taskController.deleteTask);
@@ -36,11 +37,13 @@ router.post("/getAll/task", authMiddleware, taskController.getAllTasks);
 router.post("/get/task", authMiddleware, taskController.getTask);
 router.post("/changeStatus/task", authMiddleware, taskController.changeTaskStatus);
 
-router.post("/create/group", groupController.createGroup);
-router.post("/delete/group", groupController.deleteGroup);
-router.post("/updateName/group", groupController.updateGroupName);
-router.post("/addList/group", groupController.addListToGroup);
-router.post("/removeList/group", groupController.removeListFromGroup);
+router.post("/create/group", authMiddleware, groupController.createGroup);
+router.post("/delete/group", authMiddleware, groupController.deleteGroup);
+router.post("/updateName/group", authMiddleware, groupController.updateGroupName);
+router.post("/addList/group", authMiddleware, groupController.addListToGroup);
+router.post("/getGroupsNames/group", authMiddleware, groupController.getGroupsNames);
+router.post("/getGroupName/group", authMiddleware, groupController.getGroupName);
+router.post( "/removeList/group", authMiddleware, groupController.removeListFromGroup);
 
 // router.post("/create/notification", notificationController.createNotification);
 // router.post("/delete/notification", notificationController.deleteNotification);
