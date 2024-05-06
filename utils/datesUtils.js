@@ -1,6 +1,7 @@
 const { format } = require("date-fns/format");
 const { isEqual } = require("date-fns/isEqual");
 const { isAfter } = require("date-fns/isAfter");
+const { getDay } = require("date-fns/getDay");
 
 const isDatesEqual = (date1, date2) => {
   const currentDate = format(date1, "yyyy-MM-dd");
@@ -13,4 +14,8 @@ const isFirstDateAfterSecond = (date1, date2) => {
   return isAfter(new Date(date1), new Date(date2));
 }
 
-module.exports = { isDatesEqual, isFirstDateAfterSecond };
+const getDayIndex = (date) => {
+  return getDay(date);
+}
+
+module.exports = { isDatesEqual, isFirstDateAfterSecond, getDayIndex };
