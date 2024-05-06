@@ -11,7 +11,7 @@ const TaskSchema = new Schema({
     status: { type: String, default: "active" },
     priority: { type: String, default: "low" },
     description: { type: String, default: "" },
-    plannedDate: { type: Date, default: Date.now },
+    plannedDate: { type: String, default: Date.now.toString() },
     repeatDays: { type: [RepeatDaySchema], default: [] },
     category: { type: String },
 });
