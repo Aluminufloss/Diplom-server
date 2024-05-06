@@ -4,7 +4,7 @@ function filterTodayTasks (tasks) {
   const tasksToDeleteFromToday = [];
 
   const filteredTodayTasks = tasks.filter((task) => {
-    if (!isDatesEqual(task.plannedDate, new Date())) {
+    if (!isDatesEqual(new Date(task.plannedDate), new Date())) {
       tasksToDeleteFromToday.push(task._id);
 
       task.status = "expired";
