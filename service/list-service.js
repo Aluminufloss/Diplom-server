@@ -1,6 +1,6 @@
 const ListModel = require("../models/List");
 const UserModel = require("../models/User");
-const GeneralListsModel = require ("../models/GeneralLists");
+const GeneralListsModel = require("../models/GeneralLists");
 
 const ListDto = require("../dtos/list-dto");
 const TaskDto = require("../dtos/task-dto");
@@ -12,9 +12,7 @@ class ListService {
     const candidate = await UserModel.findOne({ _id: userId });
 
     if (!candidate) {
-      throw ApiError.BadRequest(
-        `Пользователя по данному id не обнаружено`
-      );
+      throw ApiError.BadRequest(`Пользователя по данному id не обнаружено`);
     }
 
     const list = await ListModel.findOne({ name, userId });
@@ -30,7 +28,7 @@ class ListService {
   async createGeneralLists(userId) {
     const generalLists = await GeneralListsModel.create({
       userId,
-      todayList: { tasks: [] }, 
+      todayList: { tasks: [] },
       plannedList: { tasks: [] },
       allTasksList: { tasks: [] },
     });
@@ -62,10 +60,9 @@ class ListService {
     return lists.map((list) => new ListDto(list));
   }
 
-
   async getListName(listId) {
     const list = await ListModel.findOne({ _id: listId });
-    return list.name; 
+    return list.name;
   }
 
   async getAllListsNames(listsId) {
@@ -81,7 +78,31 @@ class ListService {
 
   async getTasksByListId(listId) {
     const list = await ListModel.findOne({ _id: listId });
-    return list.tasks.map((task) => new TaskDto(task));
+
+    const resultTasks = [];
+
+    for (const taskId of list.tasks) {
+      const task = await TaskModel.findOne({ _id: taskId });
+
+      if (isFirstDateAfterSecond(new Date(), new Date(task.plannedDate))) {
+        const hasRepeatDays = task.repeatDays.some((day) => day.isSelected);
+
+        if (hasRepeatDays) {
+          task.plannedDate = planeNewRepeatDate(
+            task.plannedDate,
+            task.repeatDays
+          );
+        } else {
+          task.status = "expired";
+        }
+
+        await task.save();
+
+        resultTasks.push(new TaskDto(task));
+      }
+    }
+
+    return resultTasks;
   }
 }
 
