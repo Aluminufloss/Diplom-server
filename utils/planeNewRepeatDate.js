@@ -1,39 +1,36 @@
-const checkRepeatDays = require("./checkRepeatDays");
 const { getDayIndex } = require("./datesUtils");
 
 module.exports = planeNewRepeatDate = (date, repeatDays) => {
-  try {
-    const isTodayRepeatDay = checkRepeatDays(repeatDays);
-    const dateFromString = new Date(date);
+  const dateFromString = new Date();
 
-    if (isTodayRepeatDay) {
-      return date;
+  const dayIndex =
+    getDayIndex(dateFromString) === 0 ? 7 : getDayIndex(dateFromString);
+
+  const repeatDaysIndexes = repeatDays.reduce((acc, day, index) => {
+    if (day.isSelected) {
+      acc.push(index + 1);
     }
 
-    const repeatDaysIndexes = repeatDays.reduce((acc, day, index) => {
-      if (day.isSelected) {
-        acc.push(index + 1);
-      }
-  
-      return acc;
-    }, []);
+    return acc;
+  }, []);
 
-    const todayIndex = getDayIndex(new Date());
 
-    for (const idx of repeatDaysIndexes) {
-      if (idx > todayIndex) {
-        return new Date(
-          dateFromString.setDate(dateFromString.getDate() + idx - todayIndex)
-        ).toISOString();
-      }
-    }
-
-    return new Date(
-      dateFromString.setDate(
-        dateFromString.getDate() + repeatDaysIndexes[0] - todayIndex + 7
-      )
-    ).toISOString();
-  } catch (err) {
-    console.log("Error in planeNewRepeatDate:", err);
+  if (!repeatDaysIndexes.length) {
+    console.log("return date");
+    return date;
   }
+
+  for (const idx of repeatDaysIndexes) {
+    if (idx > dayIndex) {
+      return new Date(
+        dateFromString.setDate(dateFromString.getDate() + idx - dayIndex)
+      ).toISOString();
+    }
+  }
+
+  return new Date(
+    dateFromString.setDate(
+      dateFromString.getDate() + repeatDaysIndexes[0] - dayIndex + 7
+    )
+  ).toISOString();
 };
