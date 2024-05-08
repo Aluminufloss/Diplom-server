@@ -1,7 +1,7 @@
 const { getDayIndex } = require("./datesUtils");
 
-module.exports = checkRepeatDays = (repeatDays) => {
-  const todayDayIndex = getDayIndex(new Date());
+module.exports = checkRepeatDays = (date, repeatDays) => {
+  const dayIndex = getDayIndex(new Date(date));
 
   const repeatDaysIndexes = repeatDays.reduce((acc, day, index) => {
     if (day.isSelected) {
@@ -11,7 +11,7 @@ module.exports = checkRepeatDays = (repeatDays) => {
     return acc;
   }, []);
 
-  const isRepeatDay = repeatDaysIndexes.includes(todayDayIndex);
+  const isRepeatDay = repeatDaysIndexes.includes(dayIndex);
 
   return isRepeatDay;
 }
