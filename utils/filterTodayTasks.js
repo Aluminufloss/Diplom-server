@@ -1,4 +1,5 @@
 const { isDatesEqual } = require("../utils/datesUtils");
+const planeNewRepeatDate = require("./planeNewRepeatDate");
 
 function filterTodayTasks (tasks) {
   const tasksToDeleteFromToday = [];
@@ -7,7 +8,15 @@ function filterTodayTasks (tasks) {
     if (!isDatesEqual(new Date(task.plannedDate), new Date())) {
       tasksToDeleteFromToday.push(task._id);
 
-      task.status = "expired";
+      const newPlannedDate = planeNewRepeatDate(task.plannedDate, task.repeatDays);
+
+      if (newPlannedDate === task.plannedDate) {
+        task.status = "expired";
+      } else {
+        task.status = "active";
+        task.plannedDate = newPlannedDate;
+      }
+      
       task.save();
 
       return false;
