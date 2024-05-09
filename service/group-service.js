@@ -72,6 +72,11 @@ class GroupService {
     return group.name;
   }
 
+  async getGroup(groupId) {
+    const group = await GroupModel.findOne({ _id: groupId });
+    return group;
+  }
+
   async getGroups(userId) {
     const groups = await GroupModel.find({ userId });
 
