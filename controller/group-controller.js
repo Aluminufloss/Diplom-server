@@ -71,6 +71,16 @@ class GroupController {
       next(err);
     }
   }
+
+  async getGroups (req, res, next) {
+    try {
+      const { id } = req.user;
+      const groups = await GroupService.getGroups(id);
+      return res.json(groups);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new GroupController();
