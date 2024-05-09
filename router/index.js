@@ -41,6 +41,7 @@ router.post("/create/group", authMiddleware, groupController.createGroup);
 router.post("/delete/group", authMiddleware, groupController.deleteGroup);
 router.post("/updateName/group", authMiddleware, groupController.updateGroupName);
 router.post("/addList/group", authMiddleware, groupController.addListToGroup);
+router.post("/getGroups/group", authMiddleware, groupController.getGroups);
 router.post("/getGroupsNames/group", authMiddleware, groupController.getGroupsNames);
 router.post("/getGroupName/group", authMiddleware, groupController.getGroupName);
 router.post( "/removeList/group", authMiddleware, groupController.removeListFromGroup);

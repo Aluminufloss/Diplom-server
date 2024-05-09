@@ -6,6 +6,7 @@ const ListDto = require("../dtos/list-dto");
 const TaskDto = require("../dtos/task-dto");
 
 const ApiError = require("../exceptions/api-error");
+const makeGroupsFromLists = require("../utils/makeGroupsFromLists");
 
 class ListService {
   async createList(name, userId) {
@@ -56,8 +57,11 @@ class ListService {
   }
 
   async getLists(userId) {
-    const lists = await ListModel.find({ userId: userId });
-    return lists.map((list) => new ListDto(list));
+    const listsIds = await ListModel.find({ userId: userId });
+
+    const { lists, groups } = await makeGroupsFromLists(listsIds);
+
+    return lists;
   }
 
   async getListName(listId) {

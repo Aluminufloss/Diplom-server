@@ -71,6 +71,16 @@ class GroupService {
     }
     return group.name;
   }
+
+  async getGroups(userId) {
+    const groups = await GroupModel.find({ userId });
+
+    if (!groups) {
+      throw ApiError.BadRequest("Неккоректный id пользователя");
+    }
+
+    return groups.map((group) => new GroupDto(group));
+  }
 }
 
 module.exports = new GroupService();
