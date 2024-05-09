@@ -5,6 +5,7 @@ const taskController = require("../controller/task-controller");
 const listController = require("../controller/list-controller");
 const userController = require("../controller/user-controller");
 const groupController = require("../controller/group-controller");
+const analyticsController = require("../controller/analytics-controller");
 const notificationController = require("../controller/notification-controller");
 
 const authMiddleware = require("../middleware/auth-middleware");
@@ -46,10 +47,18 @@ router.post("/getGroupsNames/group", authMiddleware, groupController.getGroupsNa
 router.post("/getGroupName/group", authMiddleware, groupController.getGroupName);
 router.post( "/removeList/group", authMiddleware, groupController.removeListFromGroup);
 
-// router.post("/create/notification", notificationController.createNotification);
-// router.post("/delete/notification", notificationController.deleteNotification);
-// router.post("/get/notification", notificationController.getNotification);
-// router.get("/getAll/notification", notificationController.getAllNotifications);
-// router.post("/update/notification", notificationController.updateNotification);
+router.post("/getToday/analytics", authMiddleware, analyticsController.getTodayAnalytics);
+router.post("/getPlanned/analytics", authMiddleware, analyticsController.getPlannedAnalytics);
+router.post("/getAll/analytics", authMiddleware, analyticsController.getAllAnalytics);
+router.post("/getAnalyticsByList/analytics", authMiddleware, analyticsController.getAnaliticsByList);
+router.post("/getAnalyticsByGroup/analytics", authMiddleware, analyticsController.getAnaliticsByGroup);
+router.post("/getAnalyticsByWeek/analytics", authMiddleware, analyticsController.getAnalyticsByWeek);
+router.post("/getAnalyticsByMonth/analytics", authMiddleware, analyticsController.getAnalyticsByMonth);
+
+router.post("/create/notification", notificationController.createNotification);
+router.post("/delete/notification", notificationController.deleteNotification);
+router.post("/get/notification", notificationController.getNotification);
+router.get("/getAll/notification", notificationController.getAllNotifications);
+router.post("/update/notification", notificationController.updateNotification);
 
 module.exports = router;
