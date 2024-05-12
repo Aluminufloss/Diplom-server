@@ -2,6 +2,8 @@ const ListModel = require("../models/List");
 const UserModel = require("../models/User");
 const GeneralListsModel = require("../models/GeneralLists");
 
+const TaskModel = require("../models/Task");
+
 const ListDto = require("../dtos/list-dto");
 const TaskDto = require("../dtos/task-dto");
 
@@ -57,9 +59,24 @@ class ListService {
   }
 
   async getLists(userId) {
-    const listsIds = await ListModel.find({ userId: userId });
+    const listsFromDB = await ListModel.find({ userId: userId });
 
-    const { lists, groups } = await makeGroupsFromLists(listsIds);
+    const listsWithTasks = [];
+
+    for (const list of listsFromDB) {
+      const listTasks = await TaskModel.find({ _id: { $in: list.tasks } });
+      const listTasksFormatted = listTasks.map((task) => new TaskDto(task));
+
+      const listObject = {
+        listId: list._id,
+        title: list.name,
+        tasks: listTasksFormatted,
+      };
+
+      listsWithTasks.push(listObject);
+    }
+
+    const { lists, groups } = await makeGroupsFromLists(listsWithTasks);
 
     return lists;
   }
