@@ -397,8 +397,26 @@ class TaskService {
 
   async changeTaskStatus(taskId, status) {
     const task = await this.getTask(taskId);
-    task.status = status;
-    await task.save();
+
+    if (task.status === "expired") {
+      const newPlannedDate = new Date().toISOString();
+
+      const updatedTask = await TaskModel.findOneAndUpdate(
+        { _id: taskId },
+        { $set: { status, plannedDate: newPlannedDate } },
+        { new: true }
+      );
+
+      return new TaskDto(updatedTask);
+    }
+
+    const updatedTask = await TaskModel.findOneAndUpdate(
+      { _id: taskId },
+      { $set: { status } },
+      { new: true }
+    );
+
+    return new TaskDto(updatedTask);
   }
 }
 
