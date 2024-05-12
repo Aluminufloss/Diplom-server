@@ -1,4 +1,3 @@
-const ListDto = require("../dtos/list-dto");
 const groupService = require("../service/group-service");
 
 module.exports = makeGroupsFromLists = async (lists) => {
@@ -7,23 +6,20 @@ module.exports = makeGroupsFromLists = async (lists) => {
   const listsWithoutGroups = [];
 
   for (const list of lists) {
-    const formattedList = new ListDto(list);
-
     if (!list.groupId) {
-      listsWithoutGroups.push(formattedList);
+      listsWithoutGroups.push(list);
       break;
     }
 
     if (!groups[list.groupId]) {
-      groups[list.groupId] = [formattedList];
+      groups[list.groupId] = [list];
     } else {
-      groups[list.groupId].push(formattedList);
+      groups[list.groupId].push(list);
     }
   }
 
   for (const groupId of Object.keys(groups)) {
     const groupName = await groupService.getGroupName(groupId);
-    console.log("groupName ----- ", groupName);
 
     const newGroup = {
       id: groupId,
@@ -33,10 +29,6 @@ module.exports = makeGroupsFromLists = async (lists) => {
 
     resultGroups.push(newGroup);
   }
-
-  console.log("resultGroups ----- ", resultGroups);
-
-  console.log("listsWithoutGroups ----- ", listsWithoutGroups);
 
   return { groups: resultGroups, lists: listsWithoutGroups };
 };
