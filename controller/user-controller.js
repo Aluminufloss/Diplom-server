@@ -21,7 +21,7 @@ class UserContoller {
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 1 * 60 * 60 * 1000,
+        maxAge: 1 * 1 * 15 * 60 * 1000,
         httpOnly: true,
       });
 
@@ -76,6 +76,11 @@ class UserContoller {
 
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+
+      res.cookie("accessToken", userData.accessToken, {
+        maxAge: 1 * 1 * 15 * 60 * 1000,
         httpOnly: true,
       });
 
