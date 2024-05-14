@@ -76,8 +76,8 @@ class TaskController {
   async changeTaskStatus(req, res, next) {
     try {
       const { taskId, status } = req.body;
-      await TaskService.changeTaskStatus(taskId, status);
-      return res.json("Статус задачи был успешно изменен");
+      const updatedTask = await TaskService.changeTaskStatus(taskId, status);
+      return res.json(updatedTask);
     } catch (err) {
       next(err);
     }

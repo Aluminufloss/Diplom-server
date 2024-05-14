@@ -16,6 +16,8 @@ const TaskSchema = new Schema({
   plannedDate: { type: String, default: getDateInISOFormat() },
   repeatDays: { type: [RepeatDaySchema], default: [] },
   category: { type: String, default: "" },
+}, {
+  useFindAndModify: false 
 });
 
 module.exports = model("Task", TaskSchema);
