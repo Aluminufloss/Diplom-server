@@ -1,4 +1,4 @@
-const { GeneralListsModel } = require("../models/GeneralLists");
+const GeneralListsModel = require("../models/GeneralLists");
 
 const TaskService = require("../service/task-service");
 const ListService = require("../service/list-service");
@@ -21,15 +21,16 @@ class AnalyticsService {
       completed: 0,
       expired: 0,
       active: 0,
+      tasksLength: 0,
     };
 
     const categoriesAnalytics = {
-      personal: 0,
-      work: 0,
+      Personal: 0,
+      Work: 0,
       Study: 0,
       Home: 0,
       Travelling: 0,
-      Other: 0,
+      Without: 0,
     };
 
     for (const taskId of tasks) {
@@ -57,14 +58,17 @@ class AnalyticsService {
         case "active":
           tasksAnalytics.active += 1;
           break;
+        case "expired":
+          tasksAnalytics.expired += 1;
+          break;
       }
 
       switch (task.category) {
-        case "personal":
-          categoriesAnalytics.personal += 1;
+        case "Personal":
+          categoriesAnalytics.Personal += 1;
           break;
-        case "work":
-          categoriesAnalytics.work += 1;
+        case "Work":
+          categoriesAnalytics.Work += 1;
           break;
         case "Study":
           categoriesAnalytics.Study += 1;
@@ -75,11 +79,13 @@ class AnalyticsService {
         case "Travelling":
           categoriesAnalytics.Travelling += 1;
           break;
-        case "Other":
-          categoriesAnalytics.Other += 1;
+        default:
+          categoriesAnalytics.Without += 1;
           break;
       }
     }
+
+    tasksAnalytics.tasksLength = tasks.length;
 
     return {
       priorityAnalytics,
@@ -133,7 +139,7 @@ class AnalyticsService {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
 
-    const allTasks = generalLists.allTasks.tasks;
+    const allTasks = generalLists.allTasksList.tasks;
 
     const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
       await this._getAnalyticsByTasks(allTasks);
@@ -256,8 +262,16 @@ class AnalyticsService {
   async getAnalyticsByMonth(userId) {
     const currentDate = new Date();
 
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    );
+    const endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
 
     const tasks = TaskModel.find(
       {
