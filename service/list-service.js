@@ -3,6 +3,7 @@ const UserModel = require("../models/User");
 const GeneralListsModel = require("../models/GeneralLists");
 
 const TaskModel = require("../models/Task");
+const GroupModel = require("../models/Group");
 
 const ListDto = require("../dtos/list-dto");
 const TaskDto = require("../dtos/task-dto");
@@ -76,9 +77,11 @@ class ListService {
       listsWithTasks.push(listObject);
     }
 
-    const { lists, groups } = await makeGroupsFromLists(listsWithTasks);
+    const userGroups = await GroupModel.find({ userId });
 
-    return lists;
+    const { lists, groups } = await makeGroupsFromLists(listsWithTasks, userGroups);
+
+    return { lists, groups };
   }
 
   async getListName(listId) {

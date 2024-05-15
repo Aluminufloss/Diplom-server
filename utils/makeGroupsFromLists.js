@@ -1,6 +1,7 @@
+const GroupDto = require("../dtos/group-dto");
 const groupService = require("../service/group-service");
 
-module.exports = makeGroupsFromLists = async (lists) => {
+module.exports = makeGroupsFromLists = async (lists, userGroups) => {
   const groups = {};
   const resultGroups = [];
   const listsWithoutGroups = [];
@@ -8,7 +9,7 @@ module.exports = makeGroupsFromLists = async (lists) => {
   for (const list of lists) {
     if (!list.groupId) {
       listsWithoutGroups.push(list);
-      break;
+      continue;
     }
 
     if (!groups[list.groupId]) {
@@ -29,6 +30,14 @@ module.exports = makeGroupsFromLists = async (lists) => {
 
     resultGroups.push(newGroup);
   }
+
+  userGroups.forEach((group) => {
+    if (!group.lists.length) {
+      resultGroups.push(new GroupDto(group));
+    }
+  });
+
+  console.log("resultGroups", resultGroups);
 
   return { groups: resultGroups, lists: listsWithoutGroups };
 };

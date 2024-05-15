@@ -45,8 +45,8 @@ class ListController {
   async getLists(req, res, next) {
     try {
       const { id } = req.user;
-      const lists = await ListService.getLists(id);
-      return res.json(lists);
+      const { lists, groups } = await ListService.getLists(id);
+      return res.json({ lists, groups });
     } catch (err) {
       next(err);
     }
