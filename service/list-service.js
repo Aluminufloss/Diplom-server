@@ -12,7 +12,7 @@ const ApiError = require("../exceptions/api-error");
 const makeGroupsFromLists = require("../utils/makeGroupsFromLists");
 
 class ListService {
-  async createList(name, userId) {
+  async createList(name, userId, groupId) {
     const candidate = await UserModel.findOne({ _id: userId });
 
     if (!candidate) {
@@ -25,7 +25,15 @@ class ListService {
       throw ApiError.BadRequest("Список с таким названием уже существует");
     }
 
-    const newList = await ListModel.create({ name, userId });
+    const newList = await ListModel.create({ name, userId, groupId });
+
+    if (groupId) {
+      const group = await GroupModel.findOne({ _id: groupId });
+
+      group.lists.push(newList._id);
+      await group.save();
+    }
+
     return new ListDto(newList);
   }
 
@@ -72,6 +80,7 @@ class ListService {
         listId: list._id,
         title: list.name,
         tasks: listTasksFormatted,
+        groupId: list.groupId,
       };
 
       listsWithTasks.push(listObject);
@@ -79,7 +88,10 @@ class ListService {
 
     const userGroups = await GroupModel.find({ userId });
 
-    const { lists, groups } = await makeGroupsFromLists(listsWithTasks, userGroups);
+    const { lists, groups } = await makeGroupsFromLists(
+      listsWithTasks,
+      userGroups
+    );
 
     return { lists, groups };
   }

@@ -15,8 +15,8 @@ class GroupController {
   async deleteGroup(req, res, next) {
     try {
       const { groupId } = req.body;
-      const group = await GroupService.deleteGroup(groupId);
-      return res.json(group);
+      await GroupService.deleteGroup(groupId);
+      return res.json("Группа успешно удалена");
     } catch (err) {
       next(err);
     }
@@ -24,7 +24,7 @@ class GroupController {
 
   async updateGroupName(req, res, next) {
     try {
-      const { groupId, name } = req.body; 
+      const { groupId, name } = req.body;
       const group = await GroupService.updateGroupName(groupId, name, userId);
       return res.json(group);
     } catch (err) {
@@ -35,8 +35,8 @@ class GroupController {
   async addListToGroup(req, res, next) {
     try {
       const { groupId, listId } = req.body;
-      const group = await GroupService.addListToGroup(groupId, listId);
-      return res.json(group);
+      await GroupService.addListToGroup(groupId, listId);
+      return res.json("Лист был успешно добавлен в группу");
     } catch (err) {
       next(err);
     }
@@ -72,7 +72,7 @@ class GroupController {
     }
   }
 
-  async getGroups (req, res, next) {
+  async getGroups(req, res, next) {
     try {
       const { id } = req.user;
       const groups = await GroupService.getGroups(id);

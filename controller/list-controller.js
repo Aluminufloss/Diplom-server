@@ -12,9 +12,9 @@ class ListController {
   }
   async createList(req, res, next) {
     try {
-      const { title } = req.body;
+      const { title, groupId } = req.body;
       const { id } = req.user;
-      const list = await ListService.createList(title, id);
+      const list = await ListService.createList(title, id, groupId);
       return res.json(list);
     } catch (err) {
       next(err);

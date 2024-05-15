@@ -1,5 +1,6 @@
 const GroupModel = require("../models/Group");
 const UserModel = require("../models/User");
+const ListModel = require("../models/List");
 
 const ApiError = require("../exceptions/api-error");
 
@@ -18,12 +19,14 @@ class GroupService {
 
   async deleteGroup(groupId) {
     const group = await GroupModel.findOne({ _id: groupId });
+    
     if (!group) {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
-
+  
+    await ListModel.deleteMany({ _id: { $in: group.lists } });
+  
     await GroupModel.deleteOne({ _id: groupId });
-    return;
   }
 
   async updateGroupName(groupId, name) {
@@ -38,6 +41,7 @@ class GroupService {
 
   async addListToGroup(groupId, listId) {
     const group = await GroupModel.findOne({ _id: groupId });
+
     if (!group) {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
@@ -64,7 +68,7 @@ class GroupService {
     return groups.map((group) => group.name);
   }
 
-  async getGroupName(groupId) { 
+  async getGroupName(groupId) {
     const group = await GroupModel.findOne({ _id: groupId });
     if (!group) {
       throw ApiError.BadRequest("Неккоректный id группы");
