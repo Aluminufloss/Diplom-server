@@ -31,7 +31,7 @@ class TaskService {
       const task = await TaskModel.create({
         title,
         description,
-        listId,
+        listId: [listId],
         priority,
         plannedDate,
         repeatDays,

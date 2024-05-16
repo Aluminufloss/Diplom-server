@@ -16,7 +16,6 @@ module.exports = planeNewRepeatDate = (date, repeatDays) => {
 
 
   if (!repeatDaysIndexes.length) {
-    console.log("return date");
     return date;
   }
 

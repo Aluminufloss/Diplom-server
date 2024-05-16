@@ -37,7 +37,5 @@ module.exports = makeGroupsFromLists = async (lists, userGroups) => {
     }
   });
 
-  console.log("resultGroups", resultGroups);
-
   return { groups: resultGroups, lists: listsWithoutGroups };
 };
