@@ -1,26 +1,6 @@
 const AnalyticsService = require("../service/analytics-service");
 
 class AnalyticsController {
-  async getTodayAnalytics(req, res, next) {
-    try {
-      const { id } = req.user;
-      const analytics = await AnalyticsService.getTodayAnalytics(id);
-      return res.json(analytics);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getPlannedAnalytics(req, res, next) {
-    try {
-      const { id } = req.user;
-      const analytics = await AnalyticsService.getPlannedAnalytics(id);
-      return res.json(analytics);
-    } catch (err) {
-      next(err);
-    }
-  }
-
   async getAllAnalytics(req, res, next) {
     try {
       const { id } = req.user;
@@ -53,25 +33,25 @@ class AnalyticsController {
     }
   }
 
-  async getAnalyticsByWeek(req, res, next) {
+  async getComparisonAnalyticsByWeek(req, res, next) {
     try {
       const { id } = req.user;
-      const analytics = await AnalyticsService.getAnalyticsByWeek(id);
+      const analytics = await AnalyticsService.getComparisonAnalyticsByWeek(id);
       return res.json(analytics);
     } catch (err) {
       next(err);
     }
   }
 
-  async getAnalyticsByMonth(req, res, next) {
+  async getComparisonAnalyticsByMonth(req, res, next) {
     try {
       const { id } = req.user;
-      const analytics = await AnalyticsService.getAnalyticsByMonth(id);
+      const analytics = await AnalyticsService.getComparisonAnalyticsByMonth(id);
       return res.json(analytics);
     } catch (err) {
       next(err);
     }
-  } 
+  }
 }
 
 module.exports = new AnalyticsController()
