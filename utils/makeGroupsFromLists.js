@@ -4,19 +4,18 @@ const groupService = require("../service/group-service");
 module.exports = makeGroupsFromLists = async (lists, userGroups) => {
   const groups = {};
   const resultGroups = [];
-  const listsWithoutGroups = [];
+  const resultLists = [];
 
   for (const list of lists) {
-    if (!list.groupId) {
-      listsWithoutGroups.push(list);
-      continue;
+    if (list.groupId) {
+      if (!groups[list.groupId]) {
+        groups[list.groupId] = [list.listId];
+      } else {
+        groups[list.groupId].push(list.listId);
+      }
     }
 
-    if (!groups[list.groupId]) {
-      groups[list.groupId] = [list];
-    } else {
-      groups[list.groupId].push(list);
-    }
+    resultLists.push(list);
   }
 
   for (const groupId of Object.keys(groups)) {
@@ -37,5 +36,5 @@ module.exports = makeGroupsFromLists = async (lists, userGroups) => {
     }
   });
 
-  return { groups: resultGroups, lists: listsWithoutGroups };
+  return { groups: resultGroups, lists: resultLists };
 };
