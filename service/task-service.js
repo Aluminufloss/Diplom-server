@@ -1,6 +1,7 @@
 const TaskModel = require("../models/Task");
 const ListModel = require("../models/List");
 const GeneralListsModel = require("../models/GeneralLists");
+const TaskCompletionModel = require("../models/TaskCompletion");
 
 const listService = require("./list-service");
 
@@ -42,6 +43,17 @@ class TaskService {
       list.tasks.push(task._id);
 
       await list.save();
+
+      const completion = await TaskCompletionModel.create({
+        userId,
+        completedAt: new Date(),
+        status: "active",
+        taskId: task._id,
+        priority: task.priority,
+        category: task.category,
+      });
+
+      await completion.save();
 
       return new TaskDto(task);
     }
@@ -98,6 +110,17 @@ class TaskService {
 
     await generalLists.save();
 
+    const completion = await TaskCompletionModel.create({
+      userId,
+      completedAt: new Date(),
+      status: "active",
+      taskId: task._id,
+      priority: task.priority,
+      category: task.category,
+    });
+
+    await completion.save();
+
     return new TaskDto(task);
   }
 
@@ -147,14 +170,36 @@ class TaskService {
     const task = await TaskModel.findById(taskData.taskId);
 
     if (!task) {
-      throw new ApiError.NotFound("Задача не была найдена");
+      throw new ApiError.BadRequest("Задача не была найдена");
     }
 
     Object.assign(task, taskData);
 
     await task.save();
 
-    if (task.listId.length) {
+    const completion = await TaskCompletionModel.findOne({
+      userId,
+      taskId: taskData.taskId,
+    });
+
+    if (task.status !== completion.status) {
+      completion.status = task.status;
+      completion.completedAt = new Date();
+    }
+
+    if (task.priority !== completion.priority) {
+      completion.priority = task.priority;
+      completion.completedAt = new Date();
+    }
+
+    if (task.category !== completion.category) {
+      completion.category = task.category;
+      completion.completedAt = new Date();
+    }
+
+    await completion.save();
+
+    if (task.listId.length === 1) {
       return new TaskDto(task);
     }
 
@@ -380,7 +425,9 @@ class TaskService {
           task.repeatDays
         );
 
-        if (newPlannedDate === task.plannedDate) {
+        if (
+          isDatesEqual(new Date(newPlannedDate), new Date(task.plannedDate))
+        ) {
           task.status = "expired";
         } else {
           task.plannedDate = newPlannedDate;
