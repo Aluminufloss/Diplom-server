@@ -1,15 +1,16 @@
 const ListModel = require("../models/List");
 const UserModel = require("../models/User");
-const GeneralListsModel = require("../models/GeneralLists");
-
 const TaskModel = require("../models/Task");
 const GroupModel = require("../models/Group");
+const GeneralListsModel = require("../models/GeneralLists");
+
+const makeGroupsFromLists = require("../utils/makeGroupsFromLists");
+const { isFirstDateAfterSecond, isDatesEqual } = require("../utils/datesUtils");
 
 const ListDto = require("../dtos/list-dto");
 const TaskDto = require("../dtos/task-dto");
 
 const ApiError = require("../exceptions/api-error");
-const makeGroupsFromLists = require("../utils/makeGroupsFromLists");
 
 class ListService {
   async createList(name, userId, groupId) {
@@ -35,6 +36,40 @@ class ListService {
     }
 
     return new ListDto(newList);
+  }
+
+  async getTasksByListId(listId) {
+    const list = await ListModel.findOne({ _id: listId });
+
+    const resultTasks = [];
+
+    for (const taskId of list.tasks) {
+      const task = await TaskModel.findOne({ _id: taskId });
+
+      if (
+        isFirstDateAfterSecond(new Date(), new Date(task.plannedDate)) &&
+        task.status !== "completed"
+      ) {
+        const newPlannedDate = planeNewRepeatDate(
+          task.plannedDate,
+          task.repeatDays
+        );
+
+        if (
+          isDatesEqual(new Date(newPlannedDate), new Date(task.plannedDate))
+        ) {
+          task.status = "expired";
+        } else {
+          task.plannedDate = newPlannedDate;
+        }
+
+        await task.save();
+      }
+
+      resultTasks.push(new TaskDto(task));
+    }
+
+    return resultTasks;
   }
 
   async createGeneralLists(userId) {
@@ -73,14 +108,13 @@ class ListService {
     const listsWithTasks = [];
 
     for (const list of listsFromDB) {
-      const listTasks = await TaskModel.find({ _id: { $in: list.tasks } });
-      const listTasksFormatted = listTasks.map((task) => new TaskDto(task));
+      const tasks = await this.getTasksByListId(list._id);
 
       const listObject = {
         listId: list._id,
         title: list.name,
-        tasks: listTasksFormatted,
         groupId: list.groupId,
+        tasks,
       };
 
       listsWithTasks.push(listObject);
@@ -110,35 +144,6 @@ class ListService {
     }
 
     return listsNames;
-  }
-
-  async getTasksByListId(listId) {
-    const list = await ListModel.findOne({ _id: listId });
-
-    const resultTasks = [];
-
-    for (const taskId of list.tasks) {
-      const task = await TaskModel.findOne({ _id: taskId });
-
-      if (isFirstDateAfterSecond(new Date(), new Date(task.plannedDate))) {
-        const hasRepeatDays = task.repeatDays.some((day) => day.isSelected);
-
-        if (hasRepeatDays) {
-          task.plannedDate = planeNewRepeatDate(
-            task.plannedDate,
-            task.repeatDays
-          );
-        } else {
-          task.status = "expired";
-        }
-
-        await task.save();
-
-        resultTasks.push(new TaskDto(task));
-      }
-    }
-
-    return resultTasks;
   }
 }
 

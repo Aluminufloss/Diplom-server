@@ -47,13 +47,11 @@ router.post("/getGroupsNames/group", authMiddleware, groupController.getGroupsNa
 router.post("/getGroupName/group", authMiddleware, groupController.getGroupName);
 router.post( "/removeList/group", authMiddleware, groupController.removeListFromGroup);
 
-router.post("/getToday/analytics", authMiddleware, analyticsController.getTodayAnalytics);
-router.post("/getPlanned/analytics", authMiddleware, analyticsController.getPlannedAnalytics);
 router.post("/getAll/analytics", authMiddleware, analyticsController.getAllAnalytics);
 router.post("/getAnalyticsByList/analytics", authMiddleware, analyticsController.getAnaliticsByList);
 router.post("/getAnalyticsByGroup/analytics", authMiddleware, analyticsController.getAnaliticsByGroup);
-router.post("/getAnalyticsByWeek/analytics", authMiddleware, analyticsController.getAnalyticsByWeek);
-router.post("/getAnalyticsByMonth/analytics", authMiddleware, analyticsController.getAnalyticsByMonth);
+router.post("/getAnalyticsByWeek/analytics", authMiddleware, analyticsController.getComparisonAnalyticsByWeek);
+router.post("/getAnalyticsByMonth/analytics", authMiddleware, analyticsController.getComparisonAnalyticsByMonth);
 
 router.post("/create/notification", notificationController.createNotification);
 router.post("/delete/notification", notificationController.deleteNotification);
