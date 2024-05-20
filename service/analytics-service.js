@@ -12,91 +12,95 @@ const { isFirstDateAfterSecond } = require("../utils/datesUtils");
 const planeNewRepeatDate = require("../utils/planeNewRepeatDate");
 
 const ApiError = require("../exceptions/api-error");
+const parseMinutesToHours = require("../utils/parseMinutesToHours");
 
 class AnalyticsService {
   async _getAnalyticsByTasks(tasks) {
-    const priorityAnalytics = {
-      low: 0,
-      medium: 0,
-      high: 0,
-      without: 0,
-    };
-
-    const tasksAnalytics = {
-      completed: 0,
-      expired: 0,
-      active: 0,
-      tasksLength: 0,
-    };
-
-    const categoriesAnalytics = {
-      Personal: 0,
-      Work: 0,
-      Study: 0,
-      Home: 0,
-      Travelling: 0,
-      Without: 0,
-    };
-
-    for (const taskId of tasks) {
-      const task = await TaskService.getTask(taskId);
-
-      switch (task.priority) {
-        case "low":
-          priorityAnalytics.low += 1;
-          break;
-        case "medium":
-          priorityAnalytics.medium += 1;
-          break;
-        case "high":
-          priorityAnalytics.high += 1;
-          break;
-        case "without":
-          priorityAnalytics.without += 1;
-          break;
+    try {
+      const priorityAnalytics = {
+        low: 0,
+        medium: 0,
+        high: 0,
+      };
+  
+      const tasksAnalytics = {
+        completed: 0,
+        expired: 0,
+        active: 0,
+        tasksLength: 0,
+      };
+  
+      const categoriesAnalytics = {
+        Personal: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        Work: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        Study: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        Home: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        Travelling: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+        Without: {
+          numberOfTasks: 0,
+          totalTime: {
+            hours: 0,
+            minutes: 0,
+          },
+        },
+      };
+  
+      for (const task of tasks) {
+        tasksAnalytics[task.status] += 1;
+        priorityAnalytics[task.priority] += 1;
+        categoriesAnalytics[task.category].numberOfTasks += 1;
+        categoriesAnalytics[task.category].totalTime.hours += task.timeDuration.hours;
+        categoriesAnalytics[task.category].totalTime.minutes +=
+          task.timeDuration.minutes;
       }
+  
+      tasksAnalytics.tasksLength = tasks.length;
 
-      switch (task.status) {
-        case "completed":
-          tasksAnalytics.completed += 1;
-          break;
-        case "active":
-          tasksAnalytics.active += 1;
-          break;
-        case "expired":
-          tasksAnalytics.expired += 1;
-          break;
+      for (const category in categoriesAnalytics) {
+        if (categoriesAnalytics[category].totalTime.minutes >= 60) {
+          const parsedTime = parseMinutesToHours(categoriesAnalytics[category].totalTime);
+          categoriesAnalytics[category].totalTime = parsedTime;
+        }
       }
-
-      switch (task.category) {
-        case "Personal":
-          categoriesAnalytics.Personal += 1;
-          break;
-        case "Work":
-          categoriesAnalytics.Work += 1;
-          break;
-        case "Study":
-          categoriesAnalytics.Study += 1;
-          break;
-        case "Home":
-          categoriesAnalytics.Home += 1;
-          break;
-        case "Travelling":
-          categoriesAnalytics.Travelling += 1;
-          break;
-        default:
-          categoriesAnalytics.Without += 1;
-          break;
-      }
+  
+      return {
+        priorityAnalytics,
+        tasksAnalytics,
+        categoriesAnalytics,
+      };
+    } catch (err) {
+      console.log("err", err)
     }
-
-    tasksAnalytics.tasksLength = tasks.length;
-
-    return {
-      priorityAnalytics,
-      tasksAnalytics,
-      categoriesAnalytics,
-    };
   }
 
   async _getAnalyticsByTasksCompletions(completions) {
@@ -189,8 +193,20 @@ class AnalyticsService {
         completedAt: { $gte: startDate, $lte: endDate },
       });
 
+      const actualCompletions = [];
+
       for (const competition of completions) {
         const task = await TaskModel.findById(competition.taskId);
+
+        if (!task) {
+          if (competition.status === "active") {
+            await competition.remove();
+          } else {
+            actualCompletions.push(competition);
+          }
+
+          continue;
+        }
 
         if (isFirstDateAfterSecond(new Date(), new Date(task.plannedDate))) {
           const newPlannedDate = planeNewRepeatDate(
@@ -210,10 +226,12 @@ class AnalyticsService {
           competition.completedAt = new Date();
           await competition.save();
         }
+
+        actualCompletions.push(competition);
       }
 
       const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
-        await this._getAnalyticsByTasksCompletions(completions);
+        await this._getAnalyticsByTasksCompletions(actualCompletions);
 
       return {
         tasksAnalytics,
@@ -232,7 +250,7 @@ class AnalyticsService {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
 
-    const allTasks = generalLists.allTasksList.tasks;
+    const allTasks = await TaskService.getAllTasks(userId);
 
     let tasks = [...allTasks];
 
@@ -244,6 +262,11 @@ class AnalyticsService {
 
     const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
       await this._getAnalyticsByTasks(tasks);
+
+    console.log("tasksAnalytics", tasksAnalytics);
+    console.log("priorityAnalytics", priorityAnalytics);
+    console.log("categoriesAnalytics", categoriesAnalytics);
+    console.log()
 
     return {
       tasksAnalytics,
@@ -271,61 +294,6 @@ class AnalyticsService {
     };
   }
 
-  async getAnaliticsByGroup(groupId) {
-    const group = await GroupService.getGroup(groupId);
-
-    if (!group) {
-      throw ApiError.BadRequest("Неккоректный id группы");
-    }
-
-    const priorityAnalyticsResult = {
-      low: 0,
-      medium: 0,
-      high: 0,
-      without: 0,
-    };
-
-    const tasksAnalyticsResult = {
-      completed: 0,
-      expired: 0,
-      active: 0,
-    };
-
-    const categoriesAnalyticsResult = {
-      personal: 0,
-      work: 0,
-      Study: 0,
-      Home: 0,
-      Travelling: 0,
-      Other: 0,
-    };
-
-    const groupLists = group.lists;
-
-    for (const list of groupLists) {
-      const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
-        await this.getAnaliticsByList(list);
-
-      for (const key in tasksAnalytics) {
-        tasksAnalyticsResult[key] += tasksAnalytics[key];
-      }
-
-      for (const key in priorityAnalytics) {
-        priorityAnalyticsResult[key] += priorityAnalytics[key];
-      }
-
-      for (const key in categoriesAnalytics) {
-        categoriesAnalyticsResult[key] += categoriesAnalytics[key];
-      }
-    }
-
-    return {
-      tasksAnalytics: tasksAnalyticsResult,
-      priorityAnalytics: priorityAnalyticsResult,
-      categoriesAnalytics: categoriesAnalyticsResult,
-    };
-  }
-
   async getComparisonAnalyticsByWeek(userId) {
     try {
       const currentDate = new Date();
@@ -347,6 +315,10 @@ class AnalyticsService {
         this._getAnalyticsByDates(userId, thisWeekStartDate, thisWeekEndDate),
         this._getAnalyticsByDates(userId, lastWeekStartDate, lastWeekEndDate),
       ]);
+
+      console.log("thisWeekAnalytics", thisWeekAnalytics);
+
+      console.log("lastWeekAnalytics", lastWeekAnalytics);
 
       const comparisonResult = {
         tasks: {
@@ -409,45 +381,44 @@ class AnalyticsService {
 
   async getAnalyticsByYear(userId) {
     try {
-        const currentDate = new Date();
-        const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
-        const endOfYear = new Date(currentDate.getFullYear() + 1, 0, 0);
+      const currentDate = new Date();
+      const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+      const endOfYear = new Date(currentDate.getFullYear() + 1, 0, 0);
 
-        const completions = await TaskCompletionModel.find({
-            userId,
-            completedAt: { $gte: startOfYear, $lte: endOfYear }
+      const completions = await TaskCompletionModel.find({
+        userId,
+        completedAt: { $gte: startOfYear, $lte: endOfYear },
+      });
+
+      const completionsByMonth = {};
+
+      for (const completion of completions) {
+        const month = completion.completedAt.getMonth();
+        completionsByMonth[month] = completionsByMonth[month] || [];
+        completionsByMonth[month].push(completion);
+      }
+
+      const analyticsByMonth = [];
+
+      for (let i = 0; i < 12; i++) {
+        const completionsForMonth = completionsByMonth[i] || [];
+        const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
+          await this._getAnalyticsByTasksCompletions(completionsForMonth);
+
+        analyticsByMonth.push({
+          month: i,
+          tasksCount: completionsForMonth.length,
+          tasksAnalytics,
+          priorityAnalytics,
+          categoriesAnalytics,
         });
+      }
 
-        const completionsByMonth = {};
-
-        for (const completion of completions) {
-            const month = completion.completedAt.getMonth();
-            completionsByMonth[month] = completionsByMonth[month] || [];
-            completionsByMonth[month].push(completion);
-        }
-
-        const analyticsByMonth = [];
-
-        for (let i = 0; i < 12; i++) {
-            const completionsForMonth = completionsByMonth[i] || [];
-            const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
-                await this._getAnalyticsByTasksCompletions(completionsForMonth);
-
-            analyticsByMonth.push({
-                month: i, 
-                tasksCount: completionsForMonth.length,
-                tasksAnalytics,
-                priorityAnalytics,
-                categoriesAnalytics
-            });
-        }
-
-        return analyticsByMonth;
+      return analyticsByMonth;
     } catch (err) {
-        console.log("Error fetching analytics by year:", err);
-        throw err;
+      console.log("Error fetching analytics by year:", err);
     }
-}
+  }
 }
 
 module.exports = new AnalyticsService();

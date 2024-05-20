@@ -19,5 +19,6 @@ module.exports = class TaskDto {
     this.repeatDays = model.repeatDays;
     this.description = model.description;
     this.category = model.category;
+    this.timeDuration = model.timeDuration;
   }
 }

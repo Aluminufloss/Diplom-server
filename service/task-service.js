@@ -24,7 +24,10 @@ class TaskService {
       repeatDays,
       category,
       status,
+      timeDuration,
     } = taskData;
+
+    const isRepeatedTask = repeatDays.some((day) => day.isSelected);
 
     if (listId.length) {
       const list = await listService.getList(listId);
@@ -38,22 +41,25 @@ class TaskService {
         repeatDays,
         category,
         status,
+        timeDuration,
       });
 
       list.tasks.push(task._id);
 
-      await list.save();
-
       const completion = await TaskCompletionModel.create({
         userId,
-        completedAt: new Date(),
-        status: "active",
         taskId: task._id,
-        priority: task.priority,
-        category: task.category,
+        statuses: ["active"],
+        completedAt: [new Date().toISOString()],
+        priorities: [task.priority],
+        categories: [task.category],
+        timeDurations: [task.timeDuration],
+        isRepatedTask: isRepeatedTask,
       });
 
       await completion.save();
+
+      await list.save();
 
       return new TaskDto(task);
     }
@@ -89,6 +95,7 @@ class TaskService {
       repeatDays,
       category,
       status,
+      timeDuration,
     });
 
     if (!task) {
@@ -112,11 +119,13 @@ class TaskService {
 
     const completion = await TaskCompletionModel.create({
       userId,
-      completedAt: new Date(),
-      status: "active",
       taskId: task._id,
-      priority: task.priority,
-      category: task.category,
+      statuses: ["active"],
+      completedAt: [new Date().toISOString()],
+      priorities: [task.priority],
+      categories: [task.category],
+      timeDurations: [task.timeDuration],
+      isRepatedTask: isRepeatedTask,
     });
 
     await completion.save();
@@ -129,6 +138,18 @@ class TaskService {
 
     if (!task) {
       throw ApiError.BadRequest("Некорректный id задачи");
+    }
+
+    const completion = await TaskCompletionModel.findOne({
+      userId,
+      taskId,
+    });
+
+    if (
+      completion.statuses[completion.statuses.length - 1] === "active" &&
+      !completion.isRepatedTask
+    ) {
+      completion.remove();
     }
 
     if (task.listId.length === 1) {
@@ -168,12 +189,22 @@ class TaskService {
 
   async updateTask(taskData, userId) {
     const task = await TaskModel.findById(taskData.taskId);
+    const taskLists = task.listId;
+
+    const isTaskDateChanged = !isDatesEqual(
+      new Date(task.plannedDate),
+      new Date(taskData.plannedDate)
+    );
 
     if (!task) {
       throw new ApiError.BadRequest("Задача не была найдена");
     }
 
     Object.assign(task, taskData);
+
+    if (taskLists.length !== 1) {
+      task.listId = taskLists;
+    }
 
     await task.save();
 
@@ -199,7 +230,7 @@ class TaskService {
 
     await completion.save();
 
-    if (task.listId.length === 1) {
+    if (task.listId.length === 1 || !isTaskDateChanged) {
       return new TaskDto(task);
     }
 
