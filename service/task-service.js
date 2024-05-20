@@ -188,82 +188,92 @@ class TaskService {
   }
 
   async updateTask(taskData, userId) {
-    const task = await TaskModel.findById(taskData.taskId);
-    const taskLists = task.listId;
+    const task = await this.getTask(taskData.taskId);
 
-    const isTaskDateChanged = !isDatesEqual(
-      new Date(task.plannedDate),
-      new Date(taskData.plannedDate)
-    );
-
-    if (!task) {
-      throw new ApiError.BadRequest("Задача не была найдена");
-    }
-
-    Object.assign(task, taskData);
-
-    if (taskLists.length !== 1) {
-      task.listId = taskLists;
-    }
-
-    await task.save();
-
-    const completion = await TaskCompletionModel.findOne({
-      userId,
-      taskId: taskData.taskId,
-    });
-
-    if (task.status !== completion.status) {
-      completion.status = task.status;
-      completion.completedAt = new Date();
-    }
-
-    if (task.priority !== completion.priority) {
-      completion.priority = task.priority;
-      completion.completedAt = new Date();
-    }
-
-    if (task.category !== completion.category) {
-      completion.category = task.category;
-      completion.completedAt = new Date();
-    }
-
-    await completion.save();
-
-    if (task.listId.length === 1 || !isTaskDateChanged) {
-      return new TaskDto(task);
-    }
-
-    const generalLists = await GeneralListsModel.findOne({
-      userId,
-    });
+    const generalLists = await GeneralListsModel.findOne({ userId });
 
     if (!generalLists) {
       throw ApiError.BadRequest("Неккоректный id пользователя");
     }
 
-    const plannedList = generalLists.plannedList;
     const todayList = generalLists.todayList;
+    const plannedList = generalLists.plannedList;
+    const allTasksList = generalLists.allTasksList;
 
-    if (!isDatesEqual(new Date(taskData.plannedDate), new Date())) {
-      todayList.tasks = todayList.tasks.filter(
-        (id) => id.toString() !== taskData.taskId
+    if (taskData.listId.length === 1 && task.listId.length === 2) {
+      const list = await ListModel.findById(taskData.listId[0]);
+
+      const isExistInList = list.tasks.includes(taskData.taskId);
+
+      if (!isExistInList) {
+        list.tasks.push(taskData.taskId);
+        await list.save();
+      }
+
+      if (isDatesEqual(new Date(taskData.plannedDate), new Date())) {
+        todayList.tasks = todayList.tasks.filter(
+          (taskId) => taskId.toString() !== taskData.taskId
+        );
+      } else {
+        plannedList.tasks = plannedList.tasks.filter(
+          (taskId) => taskId.toString() !== taskData.taskId
+        );
+      }
+
+      allTasksList.tasks = allTasksList.tasks.filter(
+        (taskId) => taskId.toString() !== taskData.taskId
+      );
+    } else if (taskData.listId.length === 0 && task.listId.length === 1) {
+      const list = await ListModel.findById(task.listId[0]);
+
+      list.tasks = list.tasks.filter(
+        (taskId) => taskId.toString() !== taskData.taskId
       );
 
-      plannedList.tasks.push(taskData.taskId);
+      await list.save();
 
-      plannedList.minPlannedDate =
-        plannedList.minPlannedDate > task.plannedDate
-          ? task.plannedDate
-          : plannedList.minPlannedDate;
+      if (isDatesEqual(new Date(taskData.plannedDate), new Date())) {
+        todayList.tasks.push(taskData.taskId);
+        taskData.listId.push(todayList._id);
+      } else {
+        plannedList.tasks.push(taskData.taskId);
+        taskData.listId.push(plannedList._id);
+      }
+
+      allTasksList.tasks.push(taskData.taskId);
+      taskData.listId.push(allTasksList._id);
     } else {
-      plannedList.tasks = plannedList.tasks.filter(
-        (id) => id.toString() !== taskData.taskId
+      const isDatesChanged = !isDatesEqual(
+        new Date(taskData.plannedDate),
+        new Date(task.plannedDate)
       );
 
-      todayList.tasks.push(taskData.taskId);
+      if (isDatesChanged && taskData.listId.length !== 1) {
+        if (isDatesEqual(new Date(taskData.plannedDate), new Date())) {
+          todayList.tasks.push(taskData.taskId);
+
+          plannedList.tasks = plannedList.tasks.filter(
+            (taskId) => taskId.toString() !== taskData.taskId
+          );
+        } else {
+          plannedList.tasks.push(taskData.taskId);
+
+          todayList.tasks = todayList.tasks.filter(
+            (taskId) => taskId.toString() !== taskData.taskId
+          );
+        }
+      }
     }
 
+    const taksListIds = task.listId;
+
+    if (taksListIds.length === 2 && taskData.listId.length !== 1) {
+      taskData.listId = taksListIds;
+    }
+
+    Object.assign(task, taskData);
+
+    await task.save();
     await generalLists.save();
 
     return new TaskDto(task);
