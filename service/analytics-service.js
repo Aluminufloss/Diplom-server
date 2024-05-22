@@ -2,108 +2,25 @@ const GeneralListsModel = require("../models/GeneralLists");
 
 const TaskService = require("../service/task-service");
 const ListService = require("../service/list-service");
-const GroupService = require("../service/group-service");
 
 const TaskModel = require("../models/Task");
 const ListModel = require("../models/List");
 const TaskCompletionModel = require("../models/TaskCompletion");
 
+const updateTaskCompletion = require("../utils/updateTaskCompletion");
+const parseMinutesToHours = require("../utils/parseMinutesToHours");
 const { isFirstDateAfterSecond } = require("../utils/datesUtils");
-const planeNewRepeatDate = require("../utils/planeNewRepeatDate");
 
 const ApiError = require("../exceptions/api-error");
-const parseMinutesToHours = require("../utils/parseMinutesToHours");
 
 class AnalyticsService {
   async _getAnalyticsByTasks(tasks) {
-    try {
-      const priorityAnalytics = {
-        low: 0,
-        medium: 0,
-        high: 0,
-      };
-  
-      const tasksAnalytics = {
-        completed: 0,
-        expired: 0,
-        active: 0,
-        tasksLength: 0,
-      };
-  
-      const categoriesAnalytics = {
-        Personal: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        Work: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        Study: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        Home: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        Travelling: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-        Without: {
-          numberOfTasks: 0,
-          totalTime: {
-            hours: 0,
-            minutes: 0,
-          },
-        },
-      };
-  
-      for (const task of tasks) {
-        tasksAnalytics[task.status] += 1;
-        priorityAnalytics[task.priority] += 1;
-        categoriesAnalytics[task.category].numberOfTasks += 1;
-        categoriesAnalytics[task.category].totalTime.hours += task.timeDuration.hours;
-        categoriesAnalytics[task.category].totalTime.minutes +=
-          task.timeDuration.minutes;
-      }
-  
-      tasksAnalytics.tasksLength = tasks.length;
+    const priorityAnalytics = {
+      low: 0,
+      medium: 0,
+      high: 0,
+    };
 
-      for (const category in categoriesAnalytics) {
-        if (categoriesAnalytics[category].totalTime.minutes >= 60) {
-          const parsedTime = parseMinutesToHours(categoriesAnalytics[category].totalTime);
-          categoriesAnalytics[category].totalTime = parsedTime;
-        }
-      }
-  
-      return {
-        priorityAnalytics,
-        tasksAnalytics,
-        categoriesAnalytics,
-      };
-    } catch (err) {
-      console.log("err", err)
-    }
-  }
-
-  async _getAnalyticsByTasksCompletions(completions) {
     const tasksAnalytics = {
       completed: 0,
       expired: 0,
@@ -112,72 +29,160 @@ class AnalyticsService {
     };
 
     const categoriesAnalytics = {
-      Personal: 0,
-      Work: 0,
-      Study: 0,
-      Home: 0,
-      Travelling: 0,
-      Without: 0,
+      Personal: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Work: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Study: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Home: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Travelling: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Without: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
     };
 
+    for (const task of tasks) {
+      tasksAnalytics[task.status] += 1;
+      priorityAnalytics[task.priority] += 1;
+      categoriesAnalytics[task.category].numberOfTasks += 1;
+      categoriesAnalytics[task.category].totalTime.hours +=
+        task.timeDuration.hours;
+      categoriesAnalytics[task.category].totalTime.minutes +=
+        task.timeDuration.minutes;
+    }
+
+    tasksAnalytics.tasksLength = tasks.length;
+
+    for (const category in categoriesAnalytics) {
+      if (categoriesAnalytics[category].totalTime.minutes >= 60) {
+        const parsedTime = parseMinutesToHours(
+          categoriesAnalytics[category].totalTime
+        );
+        categoriesAnalytics[category].totalTime = parsedTime;
+      }
+    }
+
+    return {
+      priorityAnalytics,
+      tasksAnalytics,
+      categoriesAnalytics,
+    };
+  }
+
+  async _getAnalyticsByTasksCompletions({ completions, startDate, endDate }) {
     const priorityAnalytics = {
       low: 0,
       medium: 0,
       high: 0,
-      without: 0,
+    };
+
+    const tasksAnalytics = {
+      completed: 0,
+      expired: 0,
+      active: 0,
+      tasksLength: 0,
+    };
+
+    const categoriesAnalytics = {
+      Personal: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Work: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Study: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Home: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Travelling: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
+      Without: {
+        numberOfTasks: 0,
+        totalTime: {
+          hours: 0,
+          minutes: 0,
+        },
+      },
     };
 
     for (const completion of completions) {
-      switch (completion.status) {
-        case "completed":
-          tasksAnalytics.completed += 1;
-          break;
-        case "active":
-          tasksAnalytics.active += 1;
-          break;
-        case "expired":
-          tasksAnalytics.expired += 1;
-          break;
-      }
+      for (let i = 0; i < completion.statuses.length; i++) {
+        if (
+          isFirstDateAfterSecond(
+            new Date(completion.completedAt[i]),
+            startDate
+          ) &&
+          isFirstDateAfterSecond(endDate, new Date(completion.completedAt[i]))
+        ) {
+          tasksAnalytics[completion.statuses[i]] += 1;
+          priorityAnalytics[completion.priorities[i]] += 1;
+          categoriesAnalytics[completion.categories[i]].numberOfTasks += 1;
+          categoriesAnalytics[completion.categories[i]].totalTime.hours +=
+            completion.timeDurations[i].hours;
+          categoriesAnalytics[completion.categories[i]].totalTime.minutes +=
+            completion.timeDurations[i].minutes;
 
-      switch (completion.category) {
-        case "Personal":
-          categoriesAnalytics.Personal += 1;
-          break;
-        case "Work":
-          categoriesAnalytics.Work += 1;
-          break;
-        case "Study":
-          categoriesAnalytics.Study += 1;
-          break;
-        case "Home":
-          categoriesAnalytics.Home += 1;
-          break;
-        case "Travelling":
-          categoriesAnalytics.Travelling += 1;
-          break;
-        default:
-          categoriesAnalytics.Without += 1;
-          break;
-      }
-
-      switch (completion.priority) {
-        case "low":
-          priorityAnalytics.low += 1;
-          break;
-        case "medium":
-          priorityAnalytics.medium += 1;
-          break;
-        case "high":
-          priorityAnalytics.high += 1;
-          break;
-        case "without":
-          priorityAnalytics.without += 1;
-          break;
+          tasksAnalytics.tasksLength++;
+        } else {
+          continue;
+        }
       }
     }
-
-    tasksAnalytics.tasksLength = completions.length;
 
     return {
       priorityAnalytics,
@@ -188,50 +193,41 @@ class AnalyticsService {
 
   async _getAnalyticsByDates(userId, startDate, endDate) {
     try {
-      const completions = await TaskCompletionModel.find({
-        userId,
-        completedAt: { $gte: startDate, $lte: endDate },
-      });
+      const completions = await TaskCompletionModel.find({ userId });
 
       const actualCompletions = [];
+      const updatedCompletions = [];
 
-      for (const competition of completions) {
-        const task = await TaskModel.findById(competition.taskId);
+      for (const completion of completions) {
+        const task = await TaskModel.findById(completion.taskId);
 
         if (!task) {
-          if (competition.status === "active") {
-            await competition.remove();
-          } else {
-            actualCompletions.push(competition);
-          }
+          actualCompletions.push(completion);
+        } else {
+          const updatedCompletion = updateTaskCompletion({
+            status: task.status,
+            taskCompletion: completion,
+            task,
+          });
 
-          continue;
+          actualCompletions.push(updatedCompletion);
+          updatedCompletions.push(updatedCompletion);
         }
+      }
 
-        if (isFirstDateAfterSecond(new Date(), new Date(task.plannedDate))) {
-          const newPlannedDate = planeNewRepeatDate(
-            task.plannedDate,
-            task.repeatDays
-          );
-
-          if (newPlannedDate !== task.plannedDate) {
-            task.status = "active";
-            task.plannedDate = newPlannedDate;
-          }
-          await task.save();
-        }
-
-        if (competition.status !== task.status) {
-          competition.status = task.status;
-          competition.completedAt = new Date();
-          await competition.save();
-        }
-
-        actualCompletions.push(competition);
+      for (const updatedCompletion of updatedCompletions) {
+        await TaskCompletionModel.updateOne(
+          { _id: updatedCompletion._id },
+          updatedCompletion
+        );
       }
 
       const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
-        await this._getAnalyticsByTasksCompletions(actualCompletions);
+        await this._getAnalyticsByTasksCompletions({
+          completions: actualCompletions,
+          startDate,
+          endDate,
+        });
 
       return {
         tasksAnalytics,
@@ -239,7 +235,8 @@ class AnalyticsService {
         categoriesAnalytics,
       };
     } catch (err) {
-      console.log("err", err);
+      console.error("Error fetching analytics by dates:", err);
+      throw err;
     }
   }
 
@@ -257,16 +254,14 @@ class AnalyticsService {
     const allTasksList = await ListModel.find({ userId });
 
     for (const list of allTasksList) {
-      tasks.push(...list.tasks);
+      for (const taskId of list.tasks) {
+        const task = await TaskService.getTask(taskId);
+        tasks.push(task);
+      }
     }
 
     const { tasksAnalytics, priorityAnalytics, categoriesAnalytics } =
       await this._getAnalyticsByTasks(tasks);
-
-    console.log("tasksAnalytics", tasksAnalytics);
-    console.log("priorityAnalytics", priorityAnalytics);
-    console.log("categoriesAnalytics", categoriesAnalytics);
-    console.log()
 
     return {
       tasksAnalytics,
@@ -315,10 +310,6 @@ class AnalyticsService {
         this._getAnalyticsByDates(userId, thisWeekStartDate, thisWeekEndDate),
         this._getAnalyticsByDates(userId, lastWeekStartDate, lastWeekEndDate),
       ]);
-
-      console.log("thisWeekAnalytics", thisWeekAnalytics);
-
-      console.log("lastWeekAnalytics", lastWeekAnalytics);
 
       const comparisonResult = {
         tasks: {
