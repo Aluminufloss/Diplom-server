@@ -6,6 +6,7 @@ const TaskCompletionModel = require("../models/TaskCompletion");
 const listService = require("./list-service");
 
 const filterTodayTasks = require("../utils/filterTodayTasks");
+const updateTaskCompletion = require("../utils/updateTaskCompletion");
 const { isDatesEqual, isFirstDateAfterSecond } = require("../utils/datesUtils");
 const planeNewRepeatDate = require("../utils/planeNewRepeatDate");
 
@@ -149,7 +150,7 @@ class TaskService {
       completion.statuses[completion.statuses.length - 1] === "active" &&
       !completion.isRepatedTask
     ) {
-      completion.remove();
+      await completion.remove();
     }
 
     if (task.listId.length === 1) {
@@ -273,6 +274,25 @@ class TaskService {
 
     Object.assign(task, taskData);
 
+    const taskCompletion = await TaskCompletionModel.findOne({
+      userId,
+      taskId: task._id,
+    });
+
+    if (!taskCompletion) {
+      throw ApiError.BadRequest("Неккоректный id задачи");
+    }
+
+    const isRepeatedTask = task.repeatDays.some((day) => day.isSelected);
+
+    const updatedCompletion = updateTaskCompletion({
+      status: task.status,
+      taskCompletion,
+      task,
+      isRepeatedTask,
+    });
+
+    await updatedCompletion.save();
     await task.save();
     await generalLists.save();
 
@@ -410,7 +430,7 @@ class TaskService {
             if (newPlannedDate < generalLists.plannedList.minPlannedDate) {
               newMinPlannedDate = newPlannedDate;
             }
-          } else {
+          } else if (task.status !== "completed") {
             task.status = "expired";
           }
         }
@@ -483,8 +503,25 @@ class TaskService {
     return tasks;
   }
 
-  async changeTaskStatus(taskId, status) {
+  async changeTaskStatus(taskId, status, userId) {
     const task = await this.getTask(taskId);
+
+    const taskCompletion = await TaskCompletionModel.findOne({
+      userId,
+      taskId: task._id,
+    });
+
+    if (!taskCompletion) {
+      throw ApiError.BadRequest("Неккоректный id задачи");
+    }
+
+    const updatedCompletion = updateTaskCompletion({
+      status,
+      taskCompletion,
+      task,
+    });
+
+    await updatedCompletion.save();
 
     if (task.status === "expired") {
       const newPlannedDate = new Date().toISOString();
