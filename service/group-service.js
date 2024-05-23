@@ -19,13 +19,13 @@ class GroupService {
 
   async deleteGroup(groupId) {
     const group = await GroupModel.findOne({ _id: groupId });
-    
+
     if (!group) {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
-  
+
     await ListModel.deleteMany({ _id: { $in: group.lists } });
-  
+
     await GroupModel.deleteOne({ _id: groupId });
   }
 
@@ -46,7 +46,7 @@ class GroupService {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
 
-    await GroupModel.updateOne({ _id: groupId }, { $push: { listId } });
+    await GroupModel.updateOne({ _id: groupId }, { $push: { lists: listId } });
     return;
   }
 
@@ -56,7 +56,7 @@ class GroupService {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
 
-    await GroupModel.updateOne({ _id: groupId }, { $pull: { listId } });
+    await GroupModel.updateOne({ _id: groupId }, { $pull: { lists: listId } });
     return;
   }
 

@@ -2,11 +2,6 @@ const { Schema, model } = require("mongoose");
 
 const { getDateInISOFormat } = require("../utils/datesUtils");
 
-const RepeatDaySchema = new Schema({
-  day: { type: String, required: true },
-  isSelected: { type: Boolean, default: false },
-});
-
 const TaskSchema = new Schema(
   {
     listId: [{ type: Schema.Types.ObjectId, ref: "List" }],
@@ -15,7 +10,7 @@ const TaskSchema = new Schema(
     priority: { type: String, default: "low" },
     description: { type: String, default: "" },
     plannedDate: { type: String, default: getDateInISOFormat() },
-    repeatDays: { type: [RepeatDaySchema], default: [] },
+    repeatDays: { type: Array, default: [] },
     category: { type: String, default: "" },
     timeDuration: {
       hours: { type: Number, default: 0 },
