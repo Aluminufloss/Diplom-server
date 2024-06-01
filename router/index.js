@@ -6,7 +6,6 @@ const listController = require("../controller/list-controller");
 const userController = require("../controller/user-controller");
 const groupController = require("../controller/group-controller");
 const analyticsController = require("../controller/analytics-controller");
-const notificationController = require("../controller/notification-controller");
 
 const authMiddleware = require("../middleware/auth-middleware");
 
@@ -52,11 +51,5 @@ router.post("/getAnalyticsByList/analytics", authMiddleware, analyticsController
 router.post("/getAnalyticsByGroup/analytics", authMiddleware, analyticsController.getAnaliticsByGroup);
 router.post("/getAnalyticsByWeek/analytics", authMiddleware, analyticsController.getComparisonAnalyticsByWeek);
 router.post("/getAnalyticsByMonth/analytics", authMiddleware, analyticsController.getComparisonAnalyticsByMonth);
-
-router.post("/create/notification", notificationController.createNotification);
-router.post("/delete/notification", notificationController.deleteNotification);
-router.post("/get/notification", notificationController.getNotification);
-router.get("/getAll/notification", notificationController.getAllNotifications);
-router.post("/update/notification", notificationController.updateNotification);
 
 module.exports = router;

@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const { getDateInISOFormat } = require("../utils/datesUtils");
 
 const TodayListSchema = new Schema({
   name: { type: String, default: "Today" },
@@ -8,7 +9,7 @@ const TodayListSchema = new Schema({
 const PlannedListSchema = new Schema({
   name: { type: String, default: "Planned" },
   tasks: [{ type: Schema.Types.ObjectId, ref: "Task", default: []  }],
-  minPlannedDate: { type: String, default: Date.now },
+  minPlannedDate: { type: String, default: getDateInISOFormat() },
 });
 
 const AllTasksListSchema = new Schema({
