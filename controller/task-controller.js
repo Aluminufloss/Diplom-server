@@ -4,7 +4,7 @@ class TaskController {
   async createTask(req, res, next) {
     try {
       const { id } = req.user;
-      const task = await TaskService.createTask(req.body.taskData, id);
+      const task = await TaskService.createTask(req.body, id);
       return res.json(task);
     } catch (err) {
       next(err);
@@ -14,7 +14,7 @@ class TaskController {
   async deleteTask(req, res, next) {
     try {
       const { id } = req.user;
-      const { taskId } = req.body;
+      const { taskId } = req.params;
       await TaskService.deleteTask(taskId, id);
       return res.json("Задача была успешно удалена");
     } catch (err) {
@@ -25,7 +25,8 @@ class TaskController {
   async updateTask(req, res, next) {
     try {
       const { id } = req.user;
-      const { taskData } = req.body;
+      const taskData = req.body;
+
       const task = await TaskService.updateTask(taskData, id);
       return res.json(task);
     } catch (err) {
@@ -35,7 +36,7 @@ class TaskController {
 
   async getTask(req, res, next) {
     try {
-      const { taskId } = req.body;
+      const { taskId } = req.params;
       const task = await TaskService.getTask(taskId);
       return res.json(task);
     } catch (err) {
@@ -76,12 +77,9 @@ class TaskController {
   async changeTaskStatus(req, res, next) {
     try {
       const { id } = req.user;
-      const { taskId, status } = req.body;
-      const updatedTask = await TaskService.changeTaskStatus(
-        taskId,
-        status,
-        id
-      );
+      const { taskId } = req.params;
+      const { status } = req.body;
+      const updatedTask = await TaskService.changeTaskStatus(taskId, status, id);
       return res.json(updatedTask);
     } catch (err) {
       next(err);

@@ -14,7 +14,7 @@ class GroupController {
 
   async deleteGroup(req, res, next) {
     try {
-      const { groupId } = req.body;
+      const { groupId } = req.params;
       await GroupService.deleteGroup(groupId);
       return res.json("Группа успешно удалена");
     } catch (err) {
@@ -24,9 +24,13 @@ class GroupController {
 
   async updateGroupName(req, res, next) {
     try {
-      const { groupId, name } = req.body;
-      const group = await GroupService.updateGroupName(groupId, name, userId);
-      return res.json(group);
+      const { groupId } = req.params;
+      const { name } = req.body;
+      const { id } = req.user;
+
+      await GroupService.updateGroupName(groupId, name, id);
+
+      return res.json("Нзвание группы успешно изменено");
     } catch (err) {
       next(err);
     }
@@ -34,8 +38,11 @@ class GroupController {
 
   async addListToGroup(req, res, next) {
     try {
-      const { groupId, listId } = req.body;
+      const { groupId } = req.params;
+      const { listId } = req.body;
+
       await GroupService.addListToGroup(groupId, listId);
+
       return res.json("Лист был успешно добавлен в группу");
     } catch (err) {
       next(err);
@@ -44,9 +51,11 @@ class GroupController {
 
   async removeListFromGroup(req, res, next) {
     try {
-      const { groupId, listId } = req.body;
-      const group = await GroupService.removeListFromGroup(groupId, listId);
-      return res.json(group);
+      const { groupId } = req.params;
+      const { listId } = req.body;
+
+      await GroupService.removeListFromGroup(groupId, listId);
+      return res.json("Лист был успешно удалён из группы");
     } catch (err) {
       next(err);
     }
@@ -64,7 +73,7 @@ class GroupController {
 
   async getGroupName(req, res, next) {
     try {
-      const { groupId } = req.body;
+      const { groupId } = req.params;
       const groupName = await GroupService.getGroupName(groupId);
       return res.json(groupName);
     } catch (err) {
