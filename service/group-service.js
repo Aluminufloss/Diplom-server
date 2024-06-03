@@ -36,7 +36,6 @@ class GroupService {
     }
 
     await GroupModel.updateOne({ _id: groupId }, { name });
-    return;
   }
 
   async addListToGroup(groupId, listId) {
@@ -47,7 +46,6 @@ class GroupService {
     }
 
     await GroupModel.updateOne({ _id: groupId }, { $push: { listId } });
-    return;
   }
 
   async removeListFromGroup(groupId, listId) {

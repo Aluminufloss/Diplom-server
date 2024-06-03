@@ -188,7 +188,7 @@ class TaskService {
     await task.remove();
   }
 
-  async updateTask(taskData, userId) {
+  async updateTask(taskData, userId) {  
     const task = await this.getTask(taskData.taskId);
 
     const generalLists = await GeneralListsModel.findOne({ userId });
