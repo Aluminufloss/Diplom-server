@@ -11,28 +11,6 @@ class AnalyticsController {
     }
   }
 
-  async getAnaliticsByList(req, res, next) {
-    try {
-      const { id } = req.user;
-      const { listId } = req.body;
-      const analytics = await AnalyticsService.getAnaliticsByList(id, listId);
-      return res.json(analytics);
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  async getAnaliticsByGroup(req, res, next) {
-    try {
-      const { id } = req.user;
-      const { groupId } = req.body;
-      const analytics = await AnalyticsService.getAnaliticsByGroup(id, groupId);
-      return res.json(analytics);
-    } catch (err) {
-      next(err);
-    }
-  }
-
   async getComparisonAnalyticsByWeek(req, res, next) {
     try {
       const { id } = req.user;
@@ -52,6 +30,16 @@ class AnalyticsController {
       next(err);
     }
   }
+
+  async getComparisonAnalyticsByYear(req, res, next) {
+    try {
+      const { id } = req.user;
+      const analytics = await AnalyticsService.getAnalyticsByYear(id);
+      return res.json(analytics);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
-module.exports = new AnalyticsController()
+module.exports = new AnalyticsController();

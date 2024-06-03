@@ -36,7 +36,6 @@ class GroupService {
     }
 
     await GroupModel.updateOne({ _id: groupId }, { name });
-    return;
   }
 
   async addListToGroup(groupId, listId) {
@@ -46,8 +45,7 @@ class GroupService {
       throw ApiError.BadRequest("Неккоректный id группы");
     }
 
-    await GroupModel.updateOne({ _id: groupId }, { $push: { lists: listId } });
-    return;
+    await GroupModel.updateOne({ _id: groupId }, { $push: { listId } });
   }
 
   async removeListFromGroup(groupId, listId) {
