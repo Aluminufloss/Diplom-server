@@ -1,12 +1,23 @@
-const { Schema, model } = require('mongoose')
+const { Schema, model } = require("mongoose");
+
+const { getDateInISOFormat } = require("../utils/datesUtils");
+
+const RepeatDaySchema = new Schema({
+  day: { type: String, required: true },
+  isSelected: { type: Boolean, default: false },
+});
 
 const TaskSchema = new Schema({
-    title: { type: String, unique: true, required: true },
-    priority: { type: String },
-    description: { type: String },
-    plannedDate: { type: Date },
-    repeat: { type: String },
-    category: { type: String }
-})
+  listId: [{ type: Schema.Types.ObjectId, ref: "List" }],
+  title: { type: String, required: true, default: "" },
+  status: { type: String, default: "active" },
+  priority: { type: String, default: "low" },
+  description: { type: String, default: "" },
+  plannedDate: { type: String, default: getDateInISOFormat() },
+  repeatDays: { type: [RepeatDaySchema], default: [] },
+  category: { type: String, default: "" },
+}, {
+  useFindAndModify: false 
+});
 
-module.exports = model('Task', TaskSchema)
+module.exports = model("Task", TaskSchema);
