@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 
 import ApiError from "../exceptions/api-error";
 
-import tokenService from "../service/token-service";
+import tokenService from "../service/token/token-service";
 
 interface AuthenticatedRequest extends Request {
   user?: any; //ToDO: channge to real type later

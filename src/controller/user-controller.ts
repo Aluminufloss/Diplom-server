@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import UserDto from "../dtos/user-dto";
-import UserService from "../service/user-service";
+import UserService from "../service/user/user-service";
 
 class UserController {
   async registration(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
