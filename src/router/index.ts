@@ -1,10 +1,10 @@
 import { Router } from "express";
 
-import taskController from "../controller/task-controller";
-import listController from "../controller/list-controller";
-import userController from "../controller/user-controller";
-import groupController from "../controller/group-controller";
-import analyticsController from "../controller/analytics-controller";
+import taskController from "../controllers/task-controller";
+import listController from "../controllers/list-controller";
+import userController from "../controllers/user-controller";
+import groupController from "../controllers/group-controller";
+import analyticsController from "../controllers/analytics-controller";
 
 import authMiddleware from "../middleware/auth-middleware";
 

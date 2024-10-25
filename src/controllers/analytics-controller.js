@@ -1,4 +1,4 @@
-const AnalyticsService = require("../service/analytics-service");
+const AnalyticsService = require("../services/analytics-service");
 
 class AnalyticsController {
   async getAllAnalytics(req, res, next) {
