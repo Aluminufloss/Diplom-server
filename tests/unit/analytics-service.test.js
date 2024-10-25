@@ -1,10 +1,10 @@
-const AnalyticsService = require("../service/analytics-service");
-const TaskService = require("../service/task-service");
-const ListService = require("../service/list-service");
-const TaskModel = require("../models/Task");
-const ListModel = require("../models/List");
-const TaskCompletionModel = require("../models/TaskCompletion");
-const ApiError = require("../exceptions/api-error");
+const AnalyticsService = require("../../service/analytics-service");
+const TaskService = require("../../service/task-service");
+const ListService = require("../../service/list-service");
+const TaskModel = require("../../models/Task");
+const ListModel = require("../../models/List");
+const TaskCompletionModel = require("../../models/TaskCompletion");
+const ApiError = require("../../exceptions/api-error");
 
 jest.mock("../service/task-service");
 jest.mock("../service/list-service");

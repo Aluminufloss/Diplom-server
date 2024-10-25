@@ -1,17 +1,17 @@
-const ListModel = require("../models/List");
-const GeneralListsModel = require("../models/GeneralLists");
-const TaskCompletionModel = require("../models/TaskCompletion");
-const TaskModel = require("../models/Task");
+const ListModel = require("../../models/List");
+const GeneralListsModel = require("../../models/GeneralLists");
+const TaskCompletionModel = require("../../models/TaskCompletion");
+const TaskModel = require("../../models/Task");
 
-const filterTodayTasks = require("../utils/filterTodayTasks");
-const updateTaskCompletion = require("../utils/updateTaskCompletion");
-const { isDatesEqual, isFirstDateAfterSecond } = require("../utils/datesUtils");
-const planeNewRepeatDate = require("../utils/planeNewRepeatDate");
+const filterTodayTasks = require("../../utils/filterTodayTasks");
+const updateTaskCompletion = require("../../utils/updateTaskCompletion");
+const { isDatesEqual, isFirstDateAfterSecond } = require("../../utils/datesUtils");
+const planeNewRepeatDate = require("../../utils/planeNewRepeatDate");
 
-const ApiError = require("../exceptions/api-error");
+const ApiError = require("../../exceptions/api-error");
 
-const listService = require("../service/list-service");
-const TaskService = require("../service/task-service");
+const listService = require("../../service/list-service");
+const TaskService = require("../../service/task-service");
 
 jest.mock("../models/Task");
 jest.mock("../models/List");

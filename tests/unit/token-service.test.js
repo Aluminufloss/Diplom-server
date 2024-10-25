@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
-const tokenModel = require("../models/Token");
-const TokenService = require("../service/token-service");
+const tokenModel = require("../../models/Token");
+const TokenService = require("../../service/token-service");
 
 jest.mock("jsonwebtoken");
 jest.mock("../models/Token");

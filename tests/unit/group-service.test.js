@@ -1,9 +1,9 @@
-const GroupService = require("../service/group-service");
-const GroupModel = require("../models/Group");
-const UserModel = require("../models/User");
-const ListModel = require("../models/List");
-const ApiError = require("../exceptions/api-error");
-const GroupDto = require("../dtos/group-dto");
+const GroupService = require("../../service/group-service");
+const GroupModel = require("../../models/Group");
+const UserModel = require("../../models/User");
+const ListModel = require("../../models/List");
+const ApiError = require("../../exceptions/api-error");
+const GroupDto = require("../../dtos/group-dto");
 
 jest.mock("../models/Group");
 jest.mock("../models/User");

@@ -1,17 +1,16 @@
 const bcrypt = require("bcrypt");
 const uuid = require("uuid");
 
-const UserService = require("../service/user-service");
-const UserModel = require("../models/User");
-const tokenService = require("../service/token-service");
-const mailService = require("../service/mail-service");
-const listService = require("../service/list-service");
-const ApiError = require("../exceptions/api-error");
+const UserService = require("../../service/user-service");
+const UserModel = require("../../models/User");
+const tokenService = require("../../service/token-service");
+const mailService = require("../../service/mail-service");
+const listService = require("../../service/list-service");
 
-jest.mock("../models/User");
-jest.mock("../service/token-service");
-jest.mock("../service/mail-service");
-jest.mock("../service/list-service");
+jest.mock("../../models/User");
+jest.mock("../../service/token-service");
+jest.mock("../../service/mail-service");
+jest.mock("../../service/list-service");
 jest.mock("bcrypt");
 jest.mock("uuid");
 

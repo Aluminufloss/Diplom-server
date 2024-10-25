@@ -1,18 +1,18 @@
-const ListModel = require("../models/List");
-const UserModel = require("../models/User");
-const TaskModel = require("../models/Task");
-const GroupModel = require("../models/Group");
-const GeneralListsModel = require("../models/GeneralLists");
+const ListModel = require("../../models/List");
+const UserModel = require("../../models/User");
+const TaskModel = require("../../models/Task");
+const GroupModel = require("../../models/Group");
+const GeneralListsModel = require("../../models/GeneralLists");
 
-const makeGroupsFromLists = require("../utils/makeGroupsFromLists");
-const { isFirstDateAfterSecond, isDatesEqual } = require("../utils/datesUtils");
+const makeGroupsFromLists = require("../../utils/makeGroupsFromLists");
+const { isFirstDateAfterSecond, isDatesEqual } = require("../../utils/datesUtils");
 
-const ListDto = require("../dtos/list-dto");
-const TaskDto = require("../dtos/task-dto");
+const ListDto = require("../../dtos/list-dto");
+const TaskDto = require("../../dtos/task-dto");
 
-const ApiError = require("../exceptions/api-error");
+const ApiError = require("../../exceptions/api-error");
 
-const ListService = require("../service/list-service");
+const ListService = require("../../service/list-service");
 
 jest.mock("../models/List");
 jest.mock("../models/User");

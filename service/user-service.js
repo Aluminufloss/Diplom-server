@@ -152,7 +152,7 @@ class UserService {
       throw ApiError.UnauthorizedError("Токен не существует в базе данных");
     }
 
-const user = await UserModel.findById(userData.id);
+    const user = await UserModel.findById(userData.id);
     const userDto = new UserDto(user);
 
     return { user: userDto };
