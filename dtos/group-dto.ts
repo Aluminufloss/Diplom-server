@@ -1,6 +1,6 @@
-module.exports = class GroupDto {
-  id;
-	name;
+class GroupDto {
+  id: string;
+	name: string;
 	lists;
 
   constructor(group) {
@@ -9,3 +9,5 @@ module.exports = class GroupDto {
     this.lists = group.lists;
   }
 }
+
+export default GroupDto;
