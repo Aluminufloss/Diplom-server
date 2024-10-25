@@ -1,30 +1,29 @@
-const bcrypt = require("bcrypt");
-const uuid = require("uuid");
+import bcrypt from "bcrypt";
+import { v4 as uuidv4 } from "uuid";
 
-const UserModel = require("../models/User");
+import UserModel from "../models/User"; 
 
-const UserDto = require("../dtos/user-dto");
-const ApiError = require("../exceptions/api-error");
+import UserDto from "../dtos/user-dto";
+import ApiError from "../exceptions/api-error";
 
-const listService = require("./list-service");
-const tokenService = require("./token-service");
-const mailService = require("./mail-service");
+import listService from "./list-service";
+import tokenService from "./token-service";
+import mailService from "./mail-service";
 
-const {
+import {
   encryptAndFormatAsUuid,
   decryptFormattedUuid,
-} = require("../utils/cryptEmail");
+} from "../utils/cryptEmail";
 
 class UserService {
-  async generateTokens(user) {
+  async generateTokens(user: any) {
     const userDto = new UserDto(user);
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
     return { ...tokens, user: userDto };
   }
 
-  async registration(email, password, username) {
+  async registration(email: string, password: string, username: string) {
     const candidate = await UserModel.findOne({ email });
     if (candidate) {
       throw ApiError.BadRequest(
@@ -33,7 +32,7 @@ class UserService {
     }
 
     const hashPassword = await bcrypt.hash(password, 3);
-    const activationLink = uuid.v4();
+    const activationLink = uuidv4();
 
     const user = await UserModel.create({
       email,
@@ -57,7 +56,7 @@ class UserService {
     return { ...tokens, user: userDto };
   }
 
-  async login(email, password) {
+  async login(email: string, password: string) {
     const user = await UserModel.findOne({ email });
     if (!user) {
       throw ApiError.BadRequest("Пользователь с таким email не был найден");
@@ -75,12 +74,12 @@ class UserService {
     return this.generateTokens(user);
   }
 
-  async logout(refreshToken) {
+  async logout(refreshToken: string) {
     const token = await tokenService.removeToken(refreshToken);
     return token;
   }
 
-  async activate(activationLink) {
+  async activate(activationLink: string) {
     const user = await UserModel.findOne({ activationLink });
     if (!user) {
       throw ApiError.BadRequest("Неккоректная ссылка активации");
@@ -89,7 +88,7 @@ class UserService {
     await user.save();
   }
 
-  async refresh(refreshToken) {
+  async refresh(refreshToken: string) {
     if (!refreshToken) {
       throw ApiError.UnauthorizedError("У вас нету refresh токена");
     }
@@ -105,13 +104,11 @@ class UserService {
     }
 
     const user = await UserModel.findById(userData.id);
-
     return this.generateTokens(user);
   }
 
-  async changePassword(password, urlString) {
+  async changePassword(password: string, urlString: string) {
     const email = decryptFormattedUuid(urlString);
-
     const user = await UserModel.findOne({ email });
 
     if (!user) {
@@ -137,7 +134,7 @@ class UserService {
     );
   }
 
-  async getUser(refreshToken) {
+  async getUser(refreshToken: string) {
     if (!refreshToken) {
       return { user: {} };
     }
@@ -158,11 +155,11 @@ class UserService {
     return { user: userDto };
   }
 
-  async sendChangePasswordLink(email) {
+  async sendChangePasswordLink(email: string) {
     const generatedLink = encryptAndFormatAsUuid(email);
     const changePasswordLink = `${process.env.CLIENT_URL}/changePassword/${generatedLink}`;
     await mailService.sendChangePasswordMail(email, changePasswordLink);
   }
 }
 
-module.exports = new UserService();
+export default new UserService();

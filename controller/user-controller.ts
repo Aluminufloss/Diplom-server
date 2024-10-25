@@ -1,15 +1,12 @@
-const UserDto = require("../dtos/user-dto");
-const UserService = require("../service/user-service");
+import { Request, Response, NextFunction } from "express";
+import UserDto from "../dtos/user-dto";
+import UserService from "../service/user-service";
 
-class UserContoller {
-  async registration(req, res, next) {
+class UserController {
+  async registration(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { email, password, username } = req.body;
-      const userData = await UserService.registration(
-        email,
-        password,
-        username
-      );
+      const userData = await UserService.registration(email, password, username);
 
       if (!userData) {
         return;
@@ -21,7 +18,7 @@ class UserContoller {
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 1 * 15 * 60 * 1000,
+        maxAge: 1 * 15 * 60 * 1000, 
         httpOnly: true,
       });
 
@@ -31,21 +28,19 @@ class UserContoller {
     }
   }
 
-  async login(req, res, next) {
+  async login(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { email, password, shouldRememberMe } = req.body;
 
       const userData = await UserService.login(email, password);
 
       res.cookie("refreshToken", userData.refreshToken, {
-        maxAge: shouldRememberMe
-          ? 30 * 24 * 60 * 60 * 1000
-          : 1 * 24 * 60 * 60 * 1000,
+        maxAge: shouldRememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 1 * 15 * 60 * 1000,
+        maxAge: 1 * 15 * 60 * 1000, 
         httpOnly: true,
       });
 
@@ -55,7 +50,7 @@ class UserContoller {
     }
   }
 
-  async logout(req, res, next) {
+  async logout(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
       const token = await UserService.logout(refreshToken);
@@ -69,7 +64,7 @@ class UserContoller {
     }
   }
 
-  async refresh(req, res, next) {
+  async refresh(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
       const userData = await UserService.refresh(refreshToken);
@@ -80,7 +75,7 @@ class UserContoller {
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 1 * 15 * 60 * 1000,
+        maxAge: 1 * 15 * 60 * 1000, 
         httpOnly: true,
       });
 
@@ -90,7 +85,7 @@ class UserContoller {
     }
   }
 
-  async activate(req, res, next) {
+  async activate(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const activationLink = req.params.link;
       await UserService.activate(activationLink);
@@ -101,17 +96,17 @@ class UserContoller {
     }
   }
 
-  async sendChangePasswordLink(req, res, next) {
+  async sendChangePasswordLink(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { email } = req.body;
       await UserService.sendChangePasswordLink(email);
-      return res.json({ message: "Message sended successfully" });
+      return res.json({ message: "Message sent successfully" });
     } catch (err) {
       next(err);
     }
   }
 
-  async changePassword(req, res, next) {
+  async changePassword(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { password, urlString } = req.body;
       await UserService.changePassword(password, urlString);
@@ -121,7 +116,7 @@ class UserContoller {
     }
   }
 
-  async getUser(req, res, next) {
+  async getUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const user = new UserDto(req.user);
       return res.json({ ...user });
@@ -131,4 +126,4 @@ class UserContoller {
   }
 }
 
-module.exports = new UserContoller();
+export default new UserController();
