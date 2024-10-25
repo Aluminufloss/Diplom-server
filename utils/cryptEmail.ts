@@ -1,9 +1,14 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 
-const cryptoSecretKey = process.env.CRYPTO_SECRET_KEY;
-const cryptoAlgorithm = process.env.CRYPTO_ALGORITHM;
+const cryptoSecretKey = process.env.CRYPTO_SECRET_KEY as string;
+const cryptoAlgorithm = process.env.CRYPTO_ALGORITHM as string;
 
-function getKeyAndIv() {
+interface KeyAndIv {
+  key: string;
+  iv: Buffer;
+}
+
+function getKeyAndIv(): KeyAndIv {
   return {
     key: crypto
       .createHash("sha256")
@@ -14,7 +19,7 @@ function getKeyAndIv() {
   };
 }
 
-function encryptAndFormatAsUuid(email) {
+function encryptAndFormatAsUuid(email: string): string {
   const { key, iv } = getKeyAndIv();
   const cipher = crypto.createCipheriv(cryptoAlgorithm, key, iv);
   let encrypted = cipher.update(email, "utf8", "hex");
@@ -29,7 +34,7 @@ function encryptAndFormatAsUuid(email) {
   )}`;
 }
 
-function decryptFormattedUuid(encryptedUuid) {
+function decryptFormattedUuid(encryptedUuid: string): string | null {
   const encryptedWithIv = encryptedUuid.replace(/-/g, "");
   const encrypted = encryptedWithIv.substr(0, encryptedWithIv.length - 32);
   const ivHex = encryptedWithIv.substr(encryptedWithIv.length - 32, 32);
@@ -47,4 +52,4 @@ function decryptFormattedUuid(encryptedUuid) {
   }
 }
 
-module.exports = { encryptAndFormatAsUuid, decryptFormattedUuid };
+export { encryptAndFormatAsUuid, decryptFormattedUuid };
