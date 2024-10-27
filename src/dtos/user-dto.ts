@@ -1,10 +1,6 @@
-interface UserDto {
-  email: string;
-  id: string;
-  username?: string;
-}
+import { IUserDto } from "@/types/IUser";
 
-class UserDto implements UserDto {
+class UserDto implements IUserDto {
   email: string;
   id: string;
   username?: string;
