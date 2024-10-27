@@ -115,9 +115,8 @@ class UserService implements IUserService {
    * @param refreshToken - Refresh token
    * @returns String
    */
-  public async logout(refreshToken: string): Promise<string> {
-    const token = await tokenService.removeToken(refreshToken);
-    return token;
+  public async logout(refreshToken: string): Promise<void> {
+    await tokenService.removeToken(refreshToken);
   }
 
   /**
