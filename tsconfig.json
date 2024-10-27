@@ -13,6 +13,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@types/*": ["src/types/*"],
       "@utils/*": ["src/utils/*"],
       "@models/*": ["src/models/*"],
       "@services/*": ["src/services/*"],
@@ -20,6 +21,8 @@
       "@dtos/*": ["src/dtos/*"],
       "@exceptions/*": ["src/exceptions/*"],
       "@middlewares/*": ["src/middleware/*"],
+      "@routes/*": ["src/routes/*"],
+      "@tests/*": ["src/tests/*"]
     }
   },
   "include": ["src/**/*.ts"],
