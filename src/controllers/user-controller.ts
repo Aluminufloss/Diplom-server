@@ -1,16 +1,30 @@
 import { Request, Response, NextFunction } from "express";
-import UserDto from "../dtos/user-dto";
-import UserService from "../services/user/user-service";
+
+import UserService from "@services/user/user-service";
+
+import UserDto from "@dtos/user-dto";
+
+import { UserApiRequestType, UserApiResponseType } from "@/types/IUser";
 
 class UserController {
-  async registration(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Registers a new user
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async registration(
+    req: Request<{}, {}, UserApiRequestType>,
+    res: Response<UserApiResponseType>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { email, password, username } = req.body;
-      const userData = await UserService.registration(email, password, username);
-
-      if (!userData) {
-        return;
-      }
+      const userData = await UserService.registration({
+        email,
+        password,
+        username,
+      });
 
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -18,7 +32,7 @@ class UserController {
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 15 * 60 * 1000, 
+        maxAge: 1 * 15 * 60 * 1000,
         httpOnly: true,
       });
 
@@ -28,19 +42,30 @@ class UserController {
     }
   }
 
-  async login(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Logs in an existing user
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async login(
+    req: Request<{}, {}, UserApiRequestType>,
+    res: Response<UserApiResponseType>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { email, password, shouldRememberMe } = req.body;
-
       const userData = await UserService.login(email, password);
 
       res.cookie("refreshToken", userData.refreshToken, {
-        maxAge: shouldRememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 24 * 60 * 60 * 1000,
+        maxAge: shouldRememberMe
+          ? 30 * 24 * 60 * 60 * 1000
+          : 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 15 * 60 * 1000, 
+        maxAge: 1 * 15 * 60 * 1000,
         httpOnly: true,
       });
 
@@ -50,21 +75,41 @@ class UserController {
     }
   }
 
-  async logout(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Logs out a user
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async logout(
+    req: Request,
+    res: Response<string>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
-      const token = await UserService.logout(refreshToken);
 
+      const message = await UserService.logout(refreshToken);
       res.clearCookie("refreshToken");
       res.clearCookie("accessToken");
 
-      return res.json(token);
+      return res.json(message);
     } catch (err) {
       next(err);
     }
   }
 
-  async refresh(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Refreshes user tokens
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async refresh(
+    req: Request,
+    res: Response<UserApiResponseType>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
       const userData = await UserService.refresh(refreshToken);
@@ -75,7 +120,7 @@ class UserController {
       });
 
       res.cookie("accessToken", userData.accessToken, {
-        maxAge: 1 * 15 * 60 * 1000, 
+        maxAge: 1 * 15 * 60 * 1000,
         httpOnly: true,
       });
 
@@ -85,7 +130,17 @@ class UserController {
     }
   }
 
-  async activate(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Activates a user account
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async activate(
+    req: Request<{ link: string }>,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const activationLink = req.params.link;
       await UserService.activate(activationLink);
@@ -96,30 +151,62 @@ class UserController {
     }
   }
 
-  async sendChangePasswordLink(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Sends a change password link to the user's email
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async sendChangePasswordLink(
+    req: Request<{}, {}, { email: string }>,
+    res: Response<string>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { email } = req.body;
+
       await UserService.sendChangePasswordLink(email);
-      return res.json({ message: "Message sent successfully" });
+      return res.json("Message sent successfully");
     } catch (err) {
       next(err);
     }
   }
 
-  async changePassword(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Changes the user's password
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async changePassword(
+    req: Request<{}, {}, { password: string; urlString: string }>,
+    res: Response<string>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
       const { password, urlString } = req.body;
+
       await UserService.changePassword(password, urlString);
-      return res.json({ message: "Password was changed successfully" });
+      return res.json("Password was changed successfully");
     } catch (err) {
       next(err);
     }
   }
 
-  async getUser(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+  /**
+   * Retrieves the current user's data
+   * @param req - Express request object
+   * @param res - Express response object
+   * @param next - Express next middleware function
+   */
+  async getUser(
+    req: Request<{}, {}, {}, { user: UserDto }>,
+    res: Response<UserDto>,
+    next: NextFunction
+  ): Promise<Response | void> {
     try {
-      const user = new UserDto(req.user);
-      return res.json({ ...user });
+      const user = new UserDto(req.query.user);
+      return res.json(user);
     } catch (err) {
       next(err);
     }
