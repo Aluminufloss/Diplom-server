@@ -1,21 +1,24 @@
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
-import UserModel from "../models/User"; 
+import UserModel from "../../models/User";
 
-import UserDto from "../dtos/user-dto";
-import ApiError from "../exceptions/api-error";
+import { IUserService } from "./IUserService";
 
-import listService from "./list-service";
-import tokenService from "./token-service";
-import mailService from "./mail-service";
+import listService from "../list-service";
+import tokenService from "../token/token-service";
+import mailService from "../mail-service";
+
+import UserDto from "../../dtos/user-dto";
 
 import {
   encryptAndFormatAsUuid,
   decryptFormattedUuid,
-} from "../utils/cryptEmail";
+} from "../../utils/cryptEmail";
 
-class UserService {
+import ApiError from "../../exceptions/api-error";
+
+class UserService implements IUserService {
   async generateTokens(user: any) {
     const userDto = new UserDto(user);
     const tokens = tokenService.generateTokens({ ...userDto });
