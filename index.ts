@@ -1,13 +1,13 @@
 import cors from "cors";
+import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import express, { Application } from "express";
 
-import router from "./router/index";
+import router from "./src/router";
 
-import errorMiddleware from "./middleware/error-middleware";
+import errorMiddleware from "./src/middleware/error-middleware";
 
-import dotenv from "dotenv";
 
 dotenv.config();
 
