@@ -1,65 +1,98 @@
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 
-import UserModel from "../../models/User";
+import { IUserService } from "@services/user/IUserService";
+import tokenService from "@services/token/token-service";
+import mailService from "@services/mail-service";
 
-import { IUserService } from "./IUserService";
+import ApiError from "@exceptions/api-error";
 
-import listService from "../list-service";
-import tokenService from "../token/token-service";
-import mailService from "../mail-service";
+import UserModel from "@models/User";
 
-import UserDto from "../../dtos/user-dto";
+import UserDto from "@dtos/user-dto";
 
 import {
   encryptAndFormatAsUuid,
   decryptFormattedUuid,
-} from "../../utils/cryptEmail";
+} from "@utils/cryptEmail";
 
-import ApiError from "../../exceptions/api-error";
+import {
+  IUserDocument,
+  UserApiRequestType,
+  UserApiResponseType,
+} from "@/types/IUser";
 
+/**
+ * Class responsible for user service
+ */
 class UserService implements IUserService {
-  async generateTokens(user: any) {
+  /**
+   * Hash cost factor
+   */
+  private readonly hashCostFactor = 3;
+
+  /**
+   * Generates tokens for the user
+   * @param user - User document
+   * @returns Tokens
+   */
+  private async generateTokens(user: IUserDocument): Promise<UserApiResponseType> {
     const userDto = new UserDto(user);
+
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
     return { ...tokens, user: userDto };
   }
 
-  async registration(email: string, password: string, username: string) {
-    const candidate = await UserModel.findOne({ email });
-    if (candidate) {
+  /**
+   * Registers user
+   * @param options - User data
+   * @returns Tokens
+   */
+  public async registration(
+    options: UserApiRequestType
+  ): Promise<UserApiResponseType> {
+    const existingUser = await UserModel.findOne({ email: options.email });
+
+    if (existingUser) {
       throw ApiError.BadRequest(
         `Пользователь с данным email уже зарегистрирован`
       );
     }
 
-    const hashPassword = await bcrypt.hash(password, 3);
+    const hashPassword = await bcrypt.hash(
+      options.password,
+      this.hashCostFactor
+    );
     const activationLink = uuidv4();
 
     const user = await UserModel.create({
-      email,
+      email: options.email,
       password: hashPassword,
-      username: username,
+      username: options.username,
       activationLink,
       lastPasswords: [hashPassword],
     });
 
     await mailService.sendActivationMail(
-      email,
+      options.email,
       `${process.env.API_URL}/activate/${activationLink}`
     );
 
-    const userDto = new UserDto(user);
-    const tokens = tokenService.generateTokens({ ...userDto });
-    await tokenService.saveToken(userDto.id, tokens.refreshToken);
-
-    await listService.createGeneralLists(userDto.id);
-
-    return { ...tokens, user: userDto };
+    return this.generateTokens(user);
   }
 
-  async login(email: string, password: string) {
+  /**
+   * Logs in user
+   * @param email - User email
+   * @param password - User password
+   * @returns Tokens
+   */
+  public async login(
+    email: string,
+    password: string
+  ): Promise<UserApiResponseType> {
     const user = await UserModel.findOne({ email });
     if (!user) {
       throw ApiError.BadRequest("Пользователь с таким email не был найден");
@@ -77,40 +110,70 @@ class UserService implements IUserService {
     return this.generateTokens(user);
   }
 
-  async logout(refreshToken: string) {
+  /**
+   * Logs out user
+   * @param refreshToken - Refresh token
+   * @returns String
+   */
+  public async logout(refreshToken: string): Promise<string> {
     const token = await tokenService.removeToken(refreshToken);
     return token;
   }
 
-  async activate(activationLink: string) {
+  /**
+   * Activates user
+   * @param activationLink - Activation link
+   * @returns void
+   */
+  public async activate(activationLink: string): Promise<void> {
     const user = await UserModel.findOne({ activationLink });
+
     if (!user) {
-      throw ApiError.BadRequest("Неккоректная ссылка активации");
+      throw new ApiError(400, "Неккоректная ссылка активации");
     }
+
     user.isActivated = true;
     await user.save();
   }
 
-  async refresh(refreshToken: string) {
+  /**
+   * Refreshes user
+   * @param refreshToken - Refresh token
+   * @returns Tokens
+   */
+  public async refresh(refreshToken?: string): Promise<UserApiResponseType> {
     if (!refreshToken) {
       throw ApiError.UnauthorizedError("У вас нету refresh токена");
     }
 
     const userData = tokenService.validateRefreshToken(refreshToken);
-    const tokenFromDB = await tokenService.findToken(refreshToken);
+
     if (!userData) {
       throw ApiError.UnauthorizedError("Токен не был валидирован корректно");
     }
+
+    const tokenFromDB = await tokenService.findToken(refreshToken);
 
     if (!tokenFromDB) {
       throw ApiError.UnauthorizedError("Токен не существует в базе данных");
     }
 
     const user = await UserModel.findById(userData.id);
+
+    if (!user) {
+      throw ApiError.UnauthorizedError("Пользователь не существует");
+    }
+
     return this.generateTokens(user);
   }
 
-  async changePassword(password: string, urlString: string) {
+  /**
+   * Changes user password
+   * @param password - New password
+   * @param urlString - URL string with user email
+   * @returns void
+   */
+  public async changePassword(password: string, urlString: string) {
     const email = decryptFormattedUuid(urlString);
     const user = await UserModel.findOne({ email });
 
@@ -118,15 +181,7 @@ class UserService implements IUserService {
       throw ApiError.BadRequest("Пользователь с таким email не был найден");
     }
 
-    const isThisPasswordUsed = user.lastPasswords.some((pass) => {
-      return bcrypt.compareSync(password, pass);
-    });
-
-    if (isThisPasswordUsed) {
-      throw ApiError.BadRequest("Пароль совпадает с раннее использованным");
-    }
-
-    const hashPassword = await bcrypt.hash(password, 3);
+    const hashPassword = await bcrypt.hash(password, this.hashCostFactor);
 
     await UserModel.updateOne(
       { email },
@@ -137,7 +192,12 @@ class UserService implements IUserService {
     );
   }
 
-  async getUser(refreshToken: string) {
+  /**
+   * Gets the user by the refresh token
+   * @param refreshToken - Refresh token
+   * @returns User
+   */
+  public async getUser(refreshToken: string) {
     if (!refreshToken) {
       return { user: {} };
     }
@@ -153,12 +213,22 @@ class UserService implements IUserService {
     }
 
     const user = await UserModel.findById(userData.id);
+
+    if (!user) {
+      throw ApiError.UnauthorizedError("Пользователь не существует");
+    }
+
     const userDto = new UserDto(user);
 
     return { user: userDto };
   }
 
-  async sendChangePasswordLink(email: string) {
+  /**
+   * Sends change password link to the user
+   * @param email - User email
+   * @returns void
+   */
+  public async sendChangePasswordLink(email: string) {
     const generatedLink = encryptAndFormatAsUuid(email);
     const changePasswordLink = `${process.env.CLIENT_URL}/changePassword/${generatedLink}`;
     await mailService.sendChangePasswordMail(email, changePasswordLink);
