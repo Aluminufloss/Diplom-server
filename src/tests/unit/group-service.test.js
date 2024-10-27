@@ -42,12 +42,12 @@ describe("GroupService", () => {
       UserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        groupService.createGroup("groupName", "userId")
+        groupService.createGroup("groupName", "userId"),
       ).rejects.toThrow(
         expect.objectContaining({
           status: 400,
           message: "Пользователя по данному id не обнаружено",
-        })
+        }),
       );
 
       expect(UserModel.findOne).toHaveBeenCalledWith({ _id: "userId" });
@@ -77,7 +77,7 @@ describe("GroupService", () => {
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
@@ -95,7 +95,7 @@ describe("GroupService", () => {
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
       expect(GroupModel.updateOne).toHaveBeenCalledWith(
         { _id: "groupId" },
-        { name: "newGroupName" }
+        { name: "newGroupName" },
       );
     });
 
@@ -103,12 +103,12 @@ describe("GroupService", () => {
       GroupModel.findOne.mockResolvedValue(null);
 
       await expect(
-        groupService.updateGroupName("groupId", "newGroupName")
+        groupService.updateGroupName("groupId", "newGroupName"),
       ).rejects.toThrow(
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
@@ -126,7 +126,7 @@ describe("GroupService", () => {
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
       expect(GroupModel.updateOne).toHaveBeenCalledWith(
         { _id: "groupId" },
-        { $push: { lists: "listId" } }
+        { $push: { lists: "listId" } },
       );
     });
 
@@ -134,12 +134,12 @@ describe("GroupService", () => {
       GroupModel.findOne.mockResolvedValue(null);
 
       await expect(
-        groupService.addListToGroup("groupId", "listId")
+        groupService.addListToGroup("groupId", "listId"),
       ).rejects.toThrow(
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
@@ -157,7 +157,7 @@ describe("GroupService", () => {
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
       expect(GroupModel.updateOne).toHaveBeenCalledWith(
         { _id: "groupId" },
-        { $pull: { lists: "listId" } }
+        { $pull: { lists: "listId" } },
       );
     });
 
@@ -165,12 +165,12 @@ describe("GroupService", () => {
       GroupModel.findOne.mockResolvedValue(null);
 
       await expect(
-        groupService.removeListFromGroup("groupId", "listId")
+        groupService.removeListFromGroup("groupId", "listId"),
       ).rejects.toThrow(
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });
@@ -197,12 +197,12 @@ describe("GroupService", () => {
       GroupModel.find.mockResolvedValue(null);
 
       await expect(
-        groupService.getGroupsNames(["groupId1", "groupId2"])
+        groupService.getGroupsNames(["groupId1", "groupId2"]),
       ).rejects.toThrow(
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.find).toHaveBeenCalledWith({
@@ -229,7 +229,7 @@ describe("GroupService", () => {
         expect.objectContaining({
           status: 400,
           message: "Неккоректный id группы",
-        })
+        }),
       );
 
       expect(GroupModel.findOne).toHaveBeenCalledWith({ _id: "groupId" });

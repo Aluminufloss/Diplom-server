@@ -1,7 +1,7 @@
 class GroupDto {
   id: string;
-	name: string;
-	lists;
+  name: string;
+  lists;
 
   constructor(group) {
     this.id = group._id;

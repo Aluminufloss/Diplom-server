@@ -73,20 +73,20 @@ describe("AnalyticsService", () => {
           timeDurations: [{ hours: 0, minutes: 45 }],
         },
       ];
-  
+
       const startDate = new Date().setDate(new Date().getDate() - 1);
       const endDate = new Date().setDate(new Date().getDate() - 1);
-  
+
       // Mock TaskCompletionModel.find to return completions
       TaskCompletionModel.find.mockResolvedValue(completions);
-  
+
       // Call the method
       const result = await AnalyticsService._getAnalyticsByTasksCompletions({
         completions,
         startDate,
         endDate,
       });
-  
+
       // Update the expected result to match the mock data
       expect(result).toEqual({
         priorityAnalytics: { low: 0, medium: 1, high: 1 },
@@ -101,7 +101,7 @@ describe("AnalyticsService", () => {
         },
       });
     });
-  });  
+  });
 
   describe("_getAnalyticsByDates", () => {
     it("should return analytics by dates", async () => {
@@ -119,14 +119,14 @@ describe("AnalyticsService", () => {
           categories: ["Personal"],
         },
       ];
-  
+
       const tasksAnalytics = {
         completed: 0,
         expired: 0,
         active: 1,
         tasksLength: 1,
       };
-  
+
       // Initialize categoriesAnalytics properly
       const categoriesAnalytics = {
         Personal: { numberOfTasks: 0, totalTime: { hours: 0, minutes: 0 } },
@@ -136,17 +136,17 @@ describe("AnalyticsService", () => {
         Without: { numberOfTasks: 0, totalTime: { hours: 0, minutes: 0 } },
         Travelling: { numberOfTasks: 0, totalTime: { hours: 0, minutes: 0 } },
       };
-  
+
       // Mock TaskCompletionModel.find to return completions
       TaskCompletionModel.find.mockResolvedValue(completions);
-  
+
       // Call the method
       const result = await AnalyticsService._getAnalyticsByDates(
         userId,
         startDate,
-        endDate
+        endDate,
       );
-  
+
       // Assertion
       expect(result).toEqual({
         tasksAnalytics,
@@ -155,7 +155,6 @@ describe("AnalyticsService", () => {
       });
     });
   });
-  
 
   describe("_getComparisonAnalyticsByWeek", () => {
     it("should return comparison analytics for the current week and the previous week", async () => {
@@ -165,7 +164,7 @@ describe("AnalyticsService", () => {
       const currentDay = currentDate.getDay();
       const thisWeekStartDate = new Date(currentDate);
       thisWeekStartDate.setDate(
-        currentDate.getDate() - currentDay + (currentDay === 0 ? -6 : 1)
+        currentDate.getDate() - currentDay + (currentDay === 0 ? -6 : 1),
       );
       const thisWeekEndDate = new Date(currentDate);
       thisWeekEndDate.setDate(currentDate.getDate() - currentDay + 7);
@@ -191,9 +190,8 @@ describe("AnalyticsService", () => {
         .mockImplementationOnce(() => lastWeekAnalytics);
 
       // Call the method
-      const result = await AnalyticsService.getComparisonAnalyticsByWeek(
-        userId
-      );
+      const result =
+        await AnalyticsService.getComparisonAnalyticsByWeek(userId);
 
       // Assertion
       expect(result).toEqual({
@@ -239,9 +237,8 @@ describe("AnalyticsService", () => {
         .mockImplementationOnce(() => lastMonthAnalytics);
 
       // Call the method
-      const result = await AnalyticsService.getComparisonAnalyticsByMonth(
-        userId
-      );
+      const result =
+        await AnalyticsService.getComparisonAnalyticsByMonth(userId);
 
       // Assertion
       expect(result).toEqual({
@@ -275,7 +272,7 @@ describe("AnalyticsService", () => {
           categories: ["Personal"],
         },
       ];
-  
+
       const analyticsByMonth = [
         {
           month: 0,
@@ -285,21 +282,21 @@ describe("AnalyticsService", () => {
           categoriesAnalytics: {},
         },
       ];
-  
+
       // Mock TaskCompletionModel.find to return completions
       TaskCompletionModel.find.mockResolvedValue(completions);
-  
+
       // Mock _getAnalyticsByTasksCompletions method to return analytics for each month
       AnalyticsService._getAnalyticsByTasksCompletions = jest
         .fn()
         .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
-  
+
       // Call the method
       const result = await AnalyticsService.getAnalyticsByYear(userId);
-  
+
       // Update the expected result to match the mock data
       expect(result).toEqual(analyticsByMonth);
     });
-  });  
+  });
 });

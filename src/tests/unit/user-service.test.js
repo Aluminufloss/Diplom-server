@@ -47,7 +47,7 @@ describe("UserService", () => {
       const result = await UserService.registration(
         mockEmail,
         mockPassword,
-        mockUsername
+        mockUsername,
       );
 
       expect(UserModel.findOne).toHaveBeenCalledWith({ email: mockEmail });
@@ -61,11 +61,11 @@ describe("UserService", () => {
       });
       expect(mailService.sendActivationMail).toHaveBeenCalledWith(
         mockEmail,
-        `${process.env.API_URL}/activate/${mockActivationLink}`
+        `${process.env.API_URL}/activate/${mockActivationLink}`,
       );
       expect(tokenService.saveToken).toHaveBeenCalledWith(
         "userId", // Ensure this matches the id field in the mock user object
-        "refreshToken"
+        "refreshToken",
       );
       expect(listService.createGeneralLists).toHaveBeenCalledWith("userId");
       expect(result).toHaveProperty("accessToken", "accessToken");
@@ -77,10 +77,8 @@ describe("UserService", () => {
       UserModel.findOne.mockResolvedValue({});
 
       await expect(
-        UserService.registration("test@example.com", "password", "testuser")
-      ).rejects.toThrow(
-        "Пользователь с данным email уже зарегистрирован"
-      );
+        UserService.registration("test@example.com", "password", "testuser"),
+      ).rejects.toThrow("Пользователь с данным email уже зарегистрирован");
     });
   });
 
@@ -108,11 +106,11 @@ describe("UserService", () => {
       expect(UserModel.findOne).toHaveBeenCalledWith({ email: mockEmail });
       expect(bcrypt.compare).toHaveBeenCalledWith(
         mockPassword,
-        mockHashPassword
+        mockHashPassword,
       );
       expect(tokenService.saveToken).toHaveBeenCalledWith(
         "userId", // Ensure this matches the id field in the mock user object
-        "refreshToken"
+        "refreshToken",
       );
       expect(result).toHaveProperty("accessToken", "accessToken");
       expect(result).toHaveProperty("refreshToken", "refreshToken");
@@ -123,10 +121,8 @@ describe("UserService", () => {
       UserModel.findOne.mockResolvedValue(null);
 
       await expect(
-        UserService.login("test@example.com", "password")
-      ).rejects.toThrow(
-        "Пользователь с таким email не был найден"
-      );
+        UserService.login("test@example.com", "password"),
+      ).rejects.toThrow("Пользователь с таким email не был найден");
     });
 
     it("should throw an error if the password is incorrect", async () => {
@@ -137,10 +133,8 @@ describe("UserService", () => {
       bcrypt.compare.mockResolvedValue(false);
 
       await expect(
-        UserService.login("test@example.com", "password")
-      ).rejects.toThrow(
-        "Проверьте корректность введённых данных"
-      );
+        UserService.login("test@example.com", "password"),
+      ).rejects.toThrow("Проверьте корректность введённых данных");
     });
 
     it("should throw an error if the account is not activated", async () => {
@@ -152,7 +146,7 @@ describe("UserService", () => {
       bcrypt.compare.mockResolvedValue(true);
 
       await expect(
-        UserService.login("test@example.com", "password")
+        UserService.login("test@example.com", "password"),
       ).rejects.toThrow("Аккаунт не активирован");
     });
   });
@@ -179,7 +173,7 @@ describe("UserService", () => {
       UserModel.findOne.mockResolvedValue(null);
 
       await expect(UserService.activate("invalidLink")).rejects.toThrow(
-        "Неккоректная ссылка активации"
+        "Неккоректная ссылка активации",
       );
     });
   });

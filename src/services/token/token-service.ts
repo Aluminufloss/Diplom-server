@@ -39,7 +39,7 @@ class TokenService implements ITokenService {
     try {
       const userData = jwt.verify(
         token,
-        process.env.JWT_ACCESS_SECRET
+        process.env.JWT_ACCESS_SECRET,
       ) as JwtPayload;
       return userData;
     } catch (err) {
@@ -56,7 +56,7 @@ class TokenService implements ITokenService {
     try {
       const userData = jwt.verify(
         token,
-        process.env.JWT_REFRESH_SECRET
+        process.env.JWT_REFRESH_SECRET,
       ) as JwtPayload;
 
       return userData;
@@ -73,7 +73,7 @@ class TokenService implements ITokenService {
    */
   public async saveToken(
     userId: string,
-    refreshToken: string
+    refreshToken: string,
   ): Promise<ITokenDocument> {
     const tokenData = await tokenModel.findOne({ user: userId });
 

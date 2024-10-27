@@ -19,7 +19,7 @@ const TaskSchema = new Schema(
   },
   {
     useFindAndModify: false,
-  }
+  },
 );
 
 module.exports = model("Task", TaskSchema);

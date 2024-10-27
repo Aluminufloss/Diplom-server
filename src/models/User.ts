@@ -11,6 +11,9 @@ const UserSchema = new Schema<IUserDocument>({
   username: { type: String },
 });
 
-const UserModel: Model<IUserDocument> = model<IUserDocument>("User", UserSchema);
+const UserModel: Model<IUserDocument> = model<IUserDocument>(
+  "User",
+  UserSchema,
+);
 
 export default UserModel;

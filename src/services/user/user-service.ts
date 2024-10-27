@@ -36,7 +36,9 @@ class UserService implements IUserService {
    * @param user - User document
    * @returns Tokens
    */
-  private async generateTokens(user: IUserDocument): Promise<UserApiResponseType> {
+  private async generateTokens(
+    user: IUserDocument,
+  ): Promise<UserApiResponseType> {
     const userDto = new UserDto(user);
 
     const tokens = tokenService.generateTokens({ ...userDto });
@@ -51,19 +53,19 @@ class UserService implements IUserService {
    * @returns Tokens
    */
   public async registration(
-    options: UserApiRequestType
+    options: UserApiRequestType,
   ): Promise<UserApiResponseType> {
     const existingUser = await UserModel.findOne({ email: options.email });
 
     if (existingUser) {
       throw ApiError.BadRequest(
-        `Пользователь с данным email уже зарегистрирован`
+        `Пользователь с данным email уже зарегистрирован`,
       );
     }
 
     const hashPassword = await bcrypt.hash(
       options.password,
-      this.hashCostFactor
+      this.hashCostFactor,
     );
     const activationLink = uuidv4();
 
@@ -77,7 +79,7 @@ class UserService implements IUserService {
 
     await mailService.sendActivationMail(
       options.email,
-      `${process.env.API_URL}/activate/${activationLink}`
+      `${process.env.API_URL}/activate/${activationLink}`,
     );
 
     return this.generateTokens(user);
@@ -91,7 +93,7 @@ class UserService implements IUserService {
    */
   public async login(
     email: string,
-    password: string
+    password: string,
   ): Promise<UserApiResponseType> {
     const user = await UserModel.findOne({ email });
     if (!user) {
@@ -188,7 +190,7 @@ class UserService implements IUserService {
       {
         password: hashPassword,
         lastPasswords: [...user.lastPasswords, hashPassword],
-      }
+      },
     );
   }
 

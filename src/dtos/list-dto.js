@@ -10,4 +10,4 @@ module.exports = class ListDto {
     this.tasks = model.tasks;
     this.groupId = model.groupId;
   }
-}
+};

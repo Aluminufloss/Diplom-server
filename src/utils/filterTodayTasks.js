@@ -10,7 +10,7 @@ function filterTodayTasks(tasks) {
 
       const newPlannedDate = planeNewRepeatDate(
         task.plannedDate,
-        task.repeatDays
+        task.repeatDays,
       );
 
       if (newPlannedDate === task.plannedDate && task.status === "completed") {

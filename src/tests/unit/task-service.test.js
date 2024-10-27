@@ -5,7 +5,10 @@ const TaskModel = require("../../models/Task");
 
 const filterTodayTasks = require("../../utils/filterTodayTasks");
 const updateTaskCompletion = require("../../utils/updateTaskCompletion");
-const { isDatesEqual, isFirstDateAfterSecond } = require("../../utils/datesUtils");
+const {
+  isDatesEqual,
+  isFirstDateAfterSecond,
+} = require("../../utils/datesUtils");
 const planeNewRepeatDate = require("../../utils/planeNewRepeatDate");
 
 const ApiError = require("../../exceptions/api-error");
@@ -69,10 +72,10 @@ describe("TaskService", () => {
 
       const result = await taskService.createTask(taskData, userId);
 
-      console.log("result sujka", result)
+      console.log("result sujka", result);
 
       expect(TaskModel.create).toHaveBeenCalledWith(
-        expect.objectContaining({ ...taskData, listId: expect.any(Array) })
+        expect.objectContaining({ ...taskData, listId: expect.any(Array) }),
       );
       expect(result[0]).toHaveProperty("_id", taskData.taskId);
     });
@@ -97,7 +100,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           name: "TypeError",
           message: "Cannot read properties of null (reading 'plannedList')",
-        })
+        }),
       );
     });
   });
@@ -134,7 +137,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           status: 400,
           message: "Задача по данному id не обнаружена",
-        })
+        }),
       );
     });
   });
@@ -182,7 +185,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           status: 400,
           message: "Задача по данному id не обнаружена",
-        })
+        }),
       );
     });
   });
@@ -207,7 +210,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           status: 400,
           message: "Задача по данному id не обнаружена",
-        })
+        }),
       );
     });
   });
@@ -241,7 +244,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           status: 400,
           message: "Пользователя по данному id не обнаружено",
-        })
+        }),
       );
     });
   });
@@ -271,7 +274,7 @@ describe("TaskService", () => {
         expect.objectContaining({
           status: 400,
           message: "Пользователя по данному id не обнаружено",
-        })
+        }),
       );
     });
   });

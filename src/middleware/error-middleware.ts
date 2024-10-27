@@ -5,7 +5,7 @@ export default function (
   err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Response {
   if (err instanceof ApiError) {
     return res

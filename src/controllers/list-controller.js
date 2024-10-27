@@ -10,7 +10,7 @@ class ListController {
       next(err);
     }
   }
-  
+
   async createList(req, res, next) {
     try {
       const { title, groupId } = req.body;

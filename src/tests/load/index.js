@@ -21,7 +21,7 @@ const loginUser = () => {
   });
 
   const headers = {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json",
   };
 
   const response = http.post(`${BASE_URL}/login`, payload, {

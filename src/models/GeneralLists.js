@@ -3,12 +3,12 @@ const { getDateInISOFormat } = require("../utils/datesUtils");
 
 const TodayListSchema = new Schema({
   name: { type: String, default: "Today" },
-  tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }]
+  tasks: [{ type: Schema.Types.ObjectId, ref: "Task" }],
 });
 
 const PlannedListSchema = new Schema({
   name: { type: String, default: "Planned" },
-  tasks: [{ type: Schema.Types.ObjectId, ref: "Task", default: []  }],
+  tasks: [{ type: Schema.Types.ObjectId, ref: "Task", default: [] }],
   minPlannedDate: { type: String, default: getDateInISOFormat() },
 });
 
@@ -18,7 +18,7 @@ const AllTasksListSchema = new Schema({
 });
 
 const GeneralListsSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: "User", },
+  userId: { type: Schema.Types.ObjectId, ref: "User" },
   todayList: { type: TodayListSchema },
   plannedList: { type: PlannedListSchema },
   allTasksList: { type: AllTasksListSchema },

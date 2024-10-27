@@ -15,8 +15,8 @@ const updateTaskCompletion = ({
     isDatesEqual(
       new Date(),
       new Date(
-        taskCompletion.completedAt[taskCompletion.completedAt.length - 1]
-      )
+        taskCompletion.completedAt[taskCompletion.completedAt.length - 1],
+      ),
     )
   ) {
     const latestCompletionIndex = taskCompletion.completedAt.length - 1;

@@ -6,4 +6,4 @@ module.exports = class RepeatDayDto {
     this.isSelected = model.isSelected;
     this.day = model.day;
   }
-}
+};

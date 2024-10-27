@@ -16,7 +16,7 @@ class UserController {
   async registration(
     req: Request<{}, {}, UserApiRequestType>,
     res: Response<UserApiResponseType>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { email, password, username } = req.body;
@@ -51,7 +51,7 @@ class UserController {
   async login(
     req: Request<{}, {}, UserApiRequestType>,
     res: Response<UserApiResponseType>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { email, password, shouldRememberMe } = req.body;
@@ -84,7 +84,7 @@ class UserController {
   async logout(
     req: Request,
     res: Response<string>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
@@ -108,7 +108,7 @@ class UserController {
   async refresh(
     req: Request,
     res: Response<UserApiResponseType>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { refreshToken } = req.cookies;
@@ -139,7 +139,7 @@ class UserController {
   async activate(
     req: Request<{ link: string }>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const activationLink = req.params.link;
@@ -160,7 +160,7 @@ class UserController {
   async sendChangePasswordLink(
     req: Request<{}, {}, { email: string }>,
     res: Response<string>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { email } = req.body;
@@ -181,7 +181,7 @@ class UserController {
   async changePassword(
     req: Request<{}, {}, { password: string; urlString: string }>,
     res: Response<string>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const { password, urlString } = req.body;
@@ -202,7 +202,7 @@ class UserController {
   async getUser(
     req: Request<{}, {}, {}, { user: UserDto }>,
     res: Response<UserDto>,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<Response | void> {
     try {
       const user = new UserDto(req.query.user);

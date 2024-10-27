@@ -11,14 +11,14 @@ interface AuthenticatedRequest extends Request {
 export default function (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   try {
     const authorizationHeader = req.headers.authorization;
 
     if (!authorizationHeader) {
       return next(
-        ApiError.UnauthorizedError("Don't have authorization header")
+        ApiError.UnauthorizedError("Don't have authorization header"),
       );
     }
 
@@ -31,7 +31,7 @@ export default function (
 
     if (!userData) {
       return next(
-        ApiError.UnauthorizedError("Token didn't validate correctly")
+        ApiError.UnauthorizedError("Token didn't validate correctly"),
       );
     }
 

@@ -14,7 +14,6 @@ module.exports = planeNewRepeatDate = (date, repeatDays) => {
     return acc;
   }, []);
 
-
   if (!repeatDaysIndexes.length) {
     return date;
   }
@@ -22,14 +21,14 @@ module.exports = planeNewRepeatDate = (date, repeatDays) => {
   for (const idx of repeatDaysIndexes) {
     if (idx > dayIndex) {
       return new Date(
-        dateFromString.setDate(dateFromString.getDate() + idx - dayIndex)
+        dateFromString.setDate(dateFromString.getDate() + idx - dayIndex),
       ).toISOString();
     }
   }
 
   return new Date(
     dateFromString.setDate(
-      dateFromString.getDate() + repeatDaysIndexes[0] - dayIndex + 7
-    )
+      dateFromString.getDate() + repeatDaysIndexes[0] - dayIndex + 7,
+    ),
   ).toISOString();
 };

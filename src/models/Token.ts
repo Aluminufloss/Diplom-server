@@ -6,6 +6,9 @@ const TokenSchema = new Schema<ITokenDocument>({
   refreshToken: { type: String, required: true },
 });
 
-const TokenModel: Model<ITokenDocument> = model<ITokenDocument>("User", TokenSchema);
+const TokenModel: Model<ITokenDocument> = model<ITokenDocument>(
+  "User",
+  TokenSchema,
+);
 
 export default TokenModel;

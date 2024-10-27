@@ -8,7 +8,6 @@ import router from "./src/router";
 
 import errorMiddleware from "./src/middleware/error-middleware";
 
-
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -32,7 +31,7 @@ const start = async () => {
   try {
     if (!process.env.CONNECT_STRING) {
       throw new Error(
-        "CONNECT_STRING is not defined in the environment variables."
+        "CONNECT_STRING is not defined in the environment variables.",
       );
     }
 

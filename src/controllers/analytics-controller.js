@@ -24,7 +24,8 @@ class AnalyticsController {
   async getComparisonAnalyticsByMonth(req, res, next) {
     try {
       const { id } = req.user;
-      const analytics = await AnalyticsService.getComparisonAnalyticsByMonth(id);
+      const analytics =
+        await AnalyticsService.getComparisonAnalyticsByMonth(id);
       return res.json(analytics);
     } catch (err) {
       next(err);

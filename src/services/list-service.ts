@@ -26,7 +26,11 @@ interface IListResponse {
 }
 
 class ListService {
-  async createList({ name, userId, groupId }: ICreateListData): Promise<ListDto> {
+  async createList({
+    name,
+    userId,
+    groupId,
+  }: ICreateListData): Promise<ListDto> {
     const candidate = await UserModel.findOne({ _id: userId });
 
     if (!candidate) {
@@ -77,10 +81,12 @@ class ListService {
       ) {
         const newPlannedDate = planeNewRepeatDate(
           task.plannedDate,
-          task.repeatDays
+          task.repeatDays,
         );
 
-        if (isDatesEqual(new Date(newPlannedDate), new Date(task.plannedDate))) {
+        if (
+          isDatesEqual(new Date(newPlannedDate), new Date(task.plannedDate))
+        ) {
           task.status = "expired";
         } else {
           task.plannedDate = newPlannedDate;
@@ -129,7 +135,9 @@ class ListService {
     return list;
   }
 
-  async getLists(userId: string): Promise<{ lists: IListResponse[]; groups: any[] }> {
+  async getLists(
+    userId: string,
+  ): Promise<{ lists: IListResponse[]; groups: any[] }> {
     const listsFromDB = await ListModel.find({ userId });
 
     const listsWithTasks: IListResponse[] = [];
@@ -151,7 +159,7 @@ class ListService {
 
     const { lists, groups } = await makeGroupsFromLists(
       listsWithTasks,
-      userGroups
+      userGroups,
     );
 
     return { lists, groups };

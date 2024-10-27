@@ -27,14 +27,14 @@ describe("TokenService", () => {
         process.env.JWT_ACCESS_SECRET,
         {
           expiresIn: "30m",
-        }
+        },
       );
       expect(jwt.sign).toHaveBeenCalledWith(
         payload,
         process.env.JWT_REFRESH_SECRET,
         {
           expiresIn: "30d",
-        }
+        },
       );
       expect(tokens).toEqual({
         accessToken: mockAccessToken,
@@ -54,7 +54,7 @@ describe("TokenService", () => {
 
       expect(jwt.verify).toHaveBeenCalledWith(
         token,
-        process.env.JWT_ACCESS_SECRET
+        process.env.JWT_ACCESS_SECRET,
       );
       expect(userData).toEqual(mockUserData);
     });
@@ -70,7 +70,7 @@ describe("TokenService", () => {
 
       expect(jwt.verify).toHaveBeenCalledWith(
         token,
-        process.env.JWT_ACCESS_SECRET
+        process.env.JWT_ACCESS_SECRET,
       );
       expect(userData).toBeNull();
     });
@@ -87,7 +87,7 @@ describe("TokenService", () => {
 
       expect(jwt.verify).toHaveBeenCalledWith(
         token,
-        process.env.JWT_REFRESH_SECRET
+        process.env.JWT_REFRESH_SECRET,
       );
       expect(userData).toEqual(mockUserData);
     });
@@ -103,7 +103,7 @@ describe("TokenService", () => {
 
       expect(jwt.verify).toHaveBeenCalledWith(
         token,
-        process.env.JWT_REFRESH_SECRET
+        process.env.JWT_REFRESH_SECRET,
       );
       expect(userData).toBeNull();
     });

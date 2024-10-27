@@ -5,7 +5,10 @@ const GroupModel = require("../../models/Group");
 const GeneralListsModel = require("../../models/GeneralLists");
 
 const makeGroupsFromLists = require("../../utils/makeGroupsFromLists");
-const { isFirstDateAfterSecond, isDatesEqual } = require("../../utils/datesUtils");
+const {
+  isFirstDateAfterSecond,
+  isDatesEqual,
+} = require("../../utils/datesUtils");
 
 const ListDto = require("../../dtos/list-dto");
 const TaskDto = require("../../dtos/task-dto");
@@ -54,7 +57,7 @@ describe("ListService", () => {
       UserModel.findOne.mockResolvedValue(null);
 
       await expect(ListService.createList(name, userId)).rejects.toThrow(
-        ApiError.BadRequest("Пользователя по данному id не обнаружено").message
+        ApiError.BadRequest("Пользователя по данному id не обнаружено").message,
       );
     });
 
@@ -66,7 +69,7 @@ describe("ListService", () => {
       ListModel.findOne.mockResolvedValue({});
 
       await expect(ListService.createList(name, userId)).rejects.toThrow(
-        ApiError.BadRequest("Список с таким названием уже существует").message
+        ApiError.BadRequest("Список с таким названием уже существует").message,
       );
     });
   });
@@ -138,7 +141,7 @@ describe("ListService", () => {
       ListModel.findOne.mockResolvedValue(null);
 
       await expect(ListService.deleteList(listId, userId)).rejects.toThrow(
-        ApiError.BadRequest("Неккоректный id списка").message
+        ApiError.BadRequest("Неккоректный id списка").message,
       );
     });
 
@@ -150,7 +153,7 @@ describe("ListService", () => {
       ListModel.findOne.mockResolvedValue(mockList);
 
       await expect(ListService.deleteList(listId, userId)).rejects.toThrow(
-        ApiError.BadRequest("Неккоректный id пользователя").message
+        ApiError.BadRequest("Неккоректный id пользователя").message,
       );
     });
   });

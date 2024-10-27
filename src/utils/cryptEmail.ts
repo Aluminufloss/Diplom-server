@@ -28,13 +28,13 @@ function encryptAndFormatAsUuid(email: string): string {
   encrypted += iv.toString("hex");
   return `${encrypted.substr(0, 8)}-${encrypted.substr(
     8,
-    4
+    4,
   )}-${encrypted.substr(12, 4)}-${encrypted.substr(16, 4)}-${encrypted.substr(
-    20
+    20,
   )}`;
 }
 
-function decryptFormattedUuid(encryptedUuid: string): string | null {
+function decryptFormattedUuid(encryptedUuid: string): string {
   const encryptedWithIv = encryptedUuid.replace(/-/g, "");
   const encrypted = encryptedWithIv.substr(0, encryptedWithIv.length - 32);
   const ivHex = encryptedWithIv.substr(encryptedWithIv.length - 32, 32);
@@ -42,14 +42,10 @@ function decryptFormattedUuid(encryptedUuid: string): string | null {
   const { key } = getKeyAndIv();
   const iv = Buffer.from(ivHex, "hex");
   const decipher = crypto.createDecipheriv(cryptoAlgorithm, key, iv);
-  try {
-    let decrypted = decipher.update(encrypted, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    return decrypted;
-  } catch (error) {
-    console.error("Decryption failed:", error);
-    return null;
-  }
+
+  let decrypted = decipher.update(encrypted, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
 }
 
 export { encryptAndFormatAsUuid, decryptFormattedUuid };

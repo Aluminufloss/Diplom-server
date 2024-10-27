@@ -21,4 +21,4 @@ module.exports = class TaskDto {
     this.category = model.category;
     this.timeDuration = model.timeDuration;
   }
-}
+};

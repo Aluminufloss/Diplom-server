@@ -7,7 +7,7 @@ export default class ApiError extends Error {
     status: number,
     message: string,
     errors: any[] = [],
-    customStatus?: string
+    customStatus?: string,
   ) {
     super(message);
     this.status = status;

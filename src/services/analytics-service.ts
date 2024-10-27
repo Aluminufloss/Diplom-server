@@ -62,15 +62,24 @@ class AnalyticsService {
 
   private _getAnalyticsByTasks(tasks: any[]): AnalyticsResult {
     const priorityAnalytics: PriorityAnalytics = { low: 0, medium: 0, high: 0 };
-    const tasksAnalytics: TaskAnalytics = { completed: 0, expired: 0, active: 0, tasksLength: 0 };
-    const categoriesAnalytics: Record<string, CategoryAnalytics> = JSON.parse(JSON.stringify(this.categoriesAnalyticsTemplate));
+    const tasksAnalytics: TaskAnalytics = {
+      completed: 0,
+      expired: 0,
+      active: 0,
+      tasksLength: 0,
+    };
+    const categoriesAnalytics: Record<string, CategoryAnalytics> = JSON.parse(
+      JSON.stringify(this.categoriesAnalyticsTemplate),
+    );
 
     tasks.forEach((task) => {
       tasksAnalytics[task.status] += 1;
       priorityAnalytics[task.priority] += 1;
       categoriesAnalytics[task.category].numberOfTasks += 1;
-      categoriesAnalytics[task.category].totalTime.hours += task.timeDuration.hours;
-      categoriesAnalytics[task.category].totalTime.minutes += task.timeDuration.minutes;
+      categoriesAnalytics[task.category].totalTime.hours +=
+        task.timeDuration.hours;
+      categoriesAnalytics[task.category].totalTime.minutes +=
+        task.timeDuration.minutes;
     });
 
     tasksAnalytics.tasksLength = tasks.length;
@@ -78,7 +87,9 @@ class AnalyticsService {
     // Convert totalTime to proper hours and minutes
     Object.keys(categoriesAnalytics).forEach((category) => {
       if (categoriesAnalytics[category].totalTime.minutes >= 60) {
-        categoriesAnalytics[category].totalTime = parseMinutesToHours(categoriesAnalytics[category].totalTime);
+        categoriesAnalytics[category].totalTime = parseMinutesToHours(
+          categoriesAnalytics[category].totalTime,
+        );
       }
     });
 
@@ -95,8 +106,15 @@ class AnalyticsService {
     endDate: Date;
   }): Promise<AnalyticsResult> {
     const priorityAnalytics: PriorityAnalytics = { low: 0, medium: 0, high: 0 };
-    const tasksAnalytics: TaskAnalytics = { completed: 0, expired: 0, active: 0, tasksLength: 0 };
-    const categoriesAnalytics: Record<string, CategoryAnalytics> = JSON.parse(JSON.stringify(this.categoriesAnalyticsTemplate));
+    const tasksAnalytics: TaskAnalytics = {
+      completed: 0,
+      expired: 0,
+      active: 0,
+      tasksLength: 0,
+    };
+    const categoriesAnalytics: Record<string, CategoryAnalytics> = JSON.parse(
+      JSON.stringify(this.categoriesAnalyticsTemplate),
+    );
 
     for (const completion of completions) {
       for (let i = 0; i < completion.statuses.length; i++) {
@@ -108,8 +126,10 @@ class AnalyticsService {
           tasksAnalytics[completion.statuses[i]] += 1;
           priorityAnalytics[completion.priorities[i]] += 1;
           categoriesAnalytics[completion.categories[i]].numberOfTasks += 1;
-          categoriesAnalytics[completion.categories[i]].totalTime.hours += completion.timeDurations[i].hours;
-          categoriesAnalytics[completion.categories[i]].totalTime.minutes += completion.timeDurations[i].minutes;
+          categoriesAnalytics[completion.categories[i]].totalTime.hours +=
+            completion.timeDurations[i].hours;
+          categoriesAnalytics[completion.categories[i]].totalTime.minutes +=
+            completion.timeDurations[i].minutes;
 
           tasksAnalytics.tasksLength++;
         }
@@ -119,7 +139,11 @@ class AnalyticsService {
     return { priorityAnalytics, tasksAnalytics, categoriesAnalytics };
   }
 
-  private async _getAnalyticsByDates(userId: string, startDate: Date, endDate: Date): Promise<AnalyticsResult> {
+  private async _getAnalyticsByDates(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<AnalyticsResult> {
     try {
       const completions = await TaskCompletionModel.find({ userId });
 
@@ -132,17 +156,28 @@ class AnalyticsService {
         if (!task) {
           actualCompletions.push(completion);
         } else {
-          const updatedCompletion = updateTaskCompletion({ status: task.status, taskCompletion: completion, task });
+          const updatedCompletion = updateTaskCompletion({
+            status: task.status,
+            taskCompletion: completion,
+            task,
+          });
           actualCompletions.push(updatedCompletion);
           updatedCompletions.push(updatedCompletion);
         }
       }
 
       for (const updatedCompletion of updatedCompletions) {
-        await TaskCompletionModel.updateOne({ _id: updatedCompletion._id }, updatedCompletion);
+        await TaskCompletionModel.updateOne(
+          { _id: updatedCompletion._id },
+          updatedCompletion,
+        );
       }
 
-      return await this._getAnalyticsByTasksCompletions({ completions: actualCompletions, startDate, endDate });
+      return await this._getAnalyticsByTasksCompletions({
+        completions: actualCompletions,
+        startDate,
+        endDate,
+      });
     } catch (err) {
       console.error("Error fetching analytics by dates:", err);
       throw err;
@@ -188,7 +223,9 @@ class AnalyticsService {
       const currentDay = currentDate.getDay();
 
       const thisWeekStartDate = new Date(currentDate);
-      thisWeekStartDate.setDate(currentDate.getDate() - currentDay + (currentDay === 0 ? -6 : 1));
+      thisWeekStartDate.setDate(
+        currentDate.getDate() - currentDay + (currentDay === 0 ? -6 : 1),
+      );
       const thisWeekEndDate = new Date(currentDate);
       thisWeekEndDate.setDate(currentDate.getDate() - currentDay + 7);
 

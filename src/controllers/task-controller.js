@@ -79,7 +79,11 @@ class TaskController {
       const { id } = req.user;
       const { taskId } = req.params;
       const { status } = req.body;
-      const updatedTask = await TaskService.changeTaskStatus(taskId, status, id);
+      const updatedTask = await TaskService.changeTaskStatus(
+        taskId,
+        status,
+        id,
+      );
       return res.json(updatedTask);
     } catch (err) {
       next(err);

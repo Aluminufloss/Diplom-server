@@ -14,4 +14,4 @@ module.exports = checkRepeatDays = (date, repeatDays) => {
   const isRepeatDay = repeatDaysIndexes.includes(dayIndex);
 
   return isRepeatDay;
-}
+};
