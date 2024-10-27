@@ -1,13 +1,16 @@
-import { Schema, model } from "mongoose";
-import { IUser } from "../types/IUser";
+import { Model, Schema, model } from "mongoose";
 
-const UserSchema = new Schema<IUser>({
+import { IUserDocument } from "@/types/IUser";
+
+const UserSchema = new Schema<IUserDocument>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isActivated: { type: Boolean, default: false },
   lastPasswords: { type: [String], default: [] },
   activationLink: { type: String },
   username: { type: String },
-})
+});
 
-export default model('User', UserSchema);
+const UserModel: Model<IUserDocument> = model<IUserDocument>("User", UserSchema);
+
+export default UserModel;
